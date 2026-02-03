@@ -1,0 +1,22 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden;
+}
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: rgba(0, 0, 139, 0.514);
+    border-bottom: 1px solid lightskyblue;
+    z-index: 2;
+}
+#app {
+    position: relative;
+    z-index: 1;
+    color: white;
+}
