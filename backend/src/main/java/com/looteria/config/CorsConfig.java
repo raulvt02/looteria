@@ -21,7 +21,7 @@ public class CorsConfig implements WebMvcConfigurer {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
+        config.setAllowedOriginPatterns(List.of(
             "http://localhost:3000",
             "http://localhost:3001",
             "http://localhost:3002",
