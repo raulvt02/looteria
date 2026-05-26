@@ -29,12 +29,7 @@ public class EmailService {
             "Equipo Looteria",
             nombreUsuario, codigo
         ));
-        try {
-            mailSender.send(message);
-        } catch (Exception e) {
-            // Log the error and throw a user-friendly exception so controller can return a clear message
-            System.err.println("Error sending verification email to " + toEmail + ": " + e.getMessage());
-            throw new RuntimeException("No se pudo enviar el email de verificación. Comprueba la configuración SMTP.");
-        }
+        
+        mailSender.send(message);
     }
 }
