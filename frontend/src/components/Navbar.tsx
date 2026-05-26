@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 interface NavbarProps {
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, idParam?: string, mode?: "login" | "register") => void;
   currentPage: string;
   userRole?: "guest" | "registered" | "admin";
 }
@@ -132,7 +132,7 @@ export function Navbar({ onNavigate, currentPage }: NavbarProps) {
                   Iniciar sesión
                 </button>
                 <button
-                  onClick={() => onNavigate("login")}
+                  onClick={() => onNavigate("login", undefined, "register")}
                   className="px-6 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-all"
                 >
                   Registrarse
@@ -249,7 +249,7 @@ export function Navbar({ onNavigate, currentPage }: NavbarProps) {
                   </button>
                   <button
                     onClick={() => {
-                      onNavigate("login");
+                      onNavigate("login", undefined, "register");
                       setIsMenuOpen(false);
                     }}
                     className="block w-full text-left px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-lg"

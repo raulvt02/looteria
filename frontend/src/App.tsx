@@ -17,9 +17,10 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
   const [selectedGameId, setSelectedGameId] = useState<string>("1");
   const [selectedListingId, setSelectedListingId] = useState<string>("1");
+  const [loginMode, setLoginMode] = useState<"login" | "register">("login");
   const { user } = useAuth();
 
-  const handleNavigate = (page: string, idParam?: string) => {
+  const handleNavigate = (page: string, idParam?: string, mode?: "login" | "register") => {
   
     if (user?.rol === 'ADMIN' && page === 'profile') {
       setCurrentPage('admin' as Page);
@@ -34,6 +35,10 @@ function AppContent() {
     }
     
     setCurrentPage(page as Page);
+    
+    if (mode) {
+      setLoginMode(mode);
+    }
     
     // Asignar el ID al campo correcto según la página
     if (idParam) {
@@ -77,7 +82,7 @@ function AppContent() {
       )}
 
       {currentPage === "home" && <HomePage onNavigate={handleNavigate} />}
-      {currentPage === "login" && <LoginRegisterPage onNavigate={handleNavigate} />}
+      {currentPage === "login" && <LoginRegisterPage onNavigate={handleNavigate} initialMode={loginMode} />}
       {(currentPage === "game" || currentPage === "listing-detail") && (
         <GameDetailPage gameId={currentPage === "game" ? selectedGameId : selectedListingId} onNavigate={handleNavigate} userRole={getNavbarRole() as "guest" | "registered" | "admin"} />
       )}
