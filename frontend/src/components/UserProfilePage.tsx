@@ -974,7 +974,7 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                 onClick={() => setExchangeActiveTab("received")}
                 className={`px-6 py-3 rounded-full transition-all ${
                   exchangeActiveTab === "received"
-                    ? "bg-blue-500 text-white"
+                    ? "bg-primary hover:bg-primary/90 text-white"
                     : "bg-primary/10 text-primary hover:bg-primary/20"
                 }`}
               >
@@ -984,7 +984,7 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                 onClick={() => setExchangeActiveTab("sent")}
                 className={`px-6 py-3 rounded-full transition-all ${
                   exchangeActiveTab === "sent"
-                    ? "bg-blue-500 text-white"
+                    ? "bg-primary hover:bg-primary/90 text-white"
                     : "bg-primary/10 text-primary hover:bg-primary/20"
                 }`}
               >
