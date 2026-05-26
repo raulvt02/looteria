@@ -124,10 +124,11 @@ public class ProfileController {
             response.put("mensaje", "Publicación eliminada correctamente");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            e.printStackTrace();
             Map<String, Object> error = new HashMap<>();
             error.put("status", "ERROR");
             error.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
     
