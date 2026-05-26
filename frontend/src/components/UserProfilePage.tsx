@@ -840,9 +840,9 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                         </div>
                         <div className="flex items-center gap-6 text-sm text-gray-600 mb-4">
                           {listing.tipoTransaccion === "INTERCAMBIO" ? (
-                            <span className="text-2xl font-bold text-blue-600">Intercambio</span>
+                            <span className="text-2xl font-bold text-primary">Intercambio</span>
                           ) : (
-                            <span className="text-2xl font-bold text-blue-600">{listing.precio}€</span>
+                            <span className="text-2xl font-bold text-primary">{listing.precio}€</span>
                           )}
                           <span>{new Date(listing.fechaCreacion.split('T')[0]).toLocaleDateString('es-ES')}</span>
                         </div>

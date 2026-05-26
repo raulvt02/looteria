@@ -326,7 +326,7 @@ export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameD
                 ) : gameData.transactionType === "exchange" ? (
                   <Button
                     onClick={handleExchange}
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white py-6 text-lg"
+                    className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg"
                   >
                     <Repeat className="w-5 h-5 mr-2" />
                     Solicitar intercambio
@@ -569,7 +569,7 @@ export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameD
               </Button>
               <Button
                 onClick={confirmExchange}
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                className="flex-1 bg-primary hover:bg-primary/90"
                 disabled={exchangeLoading || !exchangeMessage.trim()}
               >
                 {exchangeLoading ? "Enviando..." : "Enviar solicitud"}
