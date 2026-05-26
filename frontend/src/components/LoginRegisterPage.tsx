@@ -177,7 +177,10 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
           {/* Tabs */}
           <div className="flex gap-2 mb-8 bg-gray-100 p-1 rounded-lg">
             <button
-              onClick={() => setIsLogin(true)}
+              onClick={() => {
+                setIsLogin(true);
+                setMessage(null);
+              }}
               className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
                 isLogin
                   ? "bg-white text-primary shadow-sm"
@@ -187,7 +190,10 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
               Iniciar sesión
             </button>
             <button
-              onClick={() => setIsLogin(false)}
+              onClick={() => {
+                setIsLogin(false);
+                setMessage(null);
+              }}
               className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
                 !isLogin
                   ? "bg-white text-primary shadow-sm"
@@ -327,24 +333,6 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
                     required={!isLogin}
                   />
                 </div>
-              </div>
-            )}
-
-            {isLogin && (
-              <div className="flex items-center justify-between">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                  />
-                  <span className="ml-2 text-sm text-gray-600">Recordarme</span>
-                </label>
-                <button
-                  type="button"
-                  className="text-sm text-primary hover:underline"
-                >
-                  ¿Olvidaste tu contraseña?
-                </button>
               </div>
             )}
 

@@ -1,4 +1,4 @@
-import { Upload, Users, ShoppingCart, Shield } from "lucide-react";
+import { Upload, Users, ShoppingCart } from "lucide-react";
 
 export function HowItWorks() {
   const steps = [
@@ -20,12 +20,6 @@ export function HowItWorks() {
       description: "Realiza transacciones seguras con pago protegido o propón intercambios justos.",
       color: "from-purple-600 to-pink-600",
     },
-    {
-      icon: Shield,
-      title: "4. Verificación incluida",
-      description: "Para artículos de alto valor, solicita verificación profesional y obtén certificado de autenticidad.",
-      color: "from-green-600 to-emerald-600",
-    },
   ];
 
   return (
@@ -40,7 +34,7 @@ export function HowItWorks() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {steps.map((step, index) => (
             <div
               key={index}
