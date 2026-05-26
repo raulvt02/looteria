@@ -18,7 +18,7 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
     
-    public User registerUser(String email, String nombreUsuario, String contrasena) {
+    public User registerUser(String email, String nombreUsuario, String contrasena, String ubicacion) {
         if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("El email ya está registrado");
         }
@@ -31,6 +31,7 @@ public class UserService {
         nuevoUsuario.setEmail(email);
         nuevoUsuario.setNombreUsuario(nombreUsuario);
         nuevoUsuario.setContrasena(contrasena);
+        nuevoUsuario.setUbicacion(ubicacion != null ? ubicacion.trim() : null);
         nuevoUsuario.setRol(UserRole.REGISTRADO);
         
         return userRepository.save(nuevoUsuario);
@@ -111,12 +112,25 @@ public class UserService {
             throw new RuntimeException("El nombre de usuario ya está en uso");
         }
 
+        // Guardar estado anterior de verificadoIdentidad para ajustar puntos
+        Boolean verificadoAntes = usuario.getVerificadoIdentidad();
+        Boolean verificadoAhora = Boolean.TRUE.equals(verificadoIdentidad);
+
         usuario.setEmail(normalizedEmail);
         usuario.setNombreUsuario(normalizedNombreUsuario);
         usuario.setRol(UserRole.valueOf(rol.trim()));
         usuario.setUbicacion(ubicacion != null ? ubicacion.trim() : null);
         usuario.setReputacionMedia(reputacionMedia != null ? reputacionMedia : BigDecimal.ZERO);
-        usuario.setVerificadoIdentidad(Boolean.TRUE.equals(verificadoIdentidad));
+        usuario.setVerificadoIdentidad(verificadoAhora);
+
+        // Ajustar puntos si cambió el estado de verificación
+        if (!verificadoAntes && verificadoAhora) {
+            // Se marcó como verificado: sumar 100 puntos
+            usuario.setPuntosAcumulados(usuario.getPuntosAcumulados() + 100);
+        } else if (verificadoAntes && !verificadoAhora) {
+            // Se quitó la verificación: restar 100 puntos (pero no permitir negativos)
+            usuario.setPuntosAcumulados(Math.max(0, usuario.getPuntosAcumulados() - 100));
+        }
 
         return convertToDTO(userRepository.save(usuario));
     }

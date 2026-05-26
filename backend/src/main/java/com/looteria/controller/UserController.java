@@ -23,6 +23,7 @@ public class UserController {
             String email = request.get("email");
             String nombreUsuario = request.get("nombreUsuario");
             String contrasena = request.get("contrasena");
+            String ubicacion = request.get("ubicacion");
             
             if (email == null || email.isEmpty()) {
                 return ResponseEntity.badRequest().body(createErrorResponse("Email requerido"));
@@ -34,7 +35,7 @@ public class UserController {
                 return ResponseEntity.badRequest().body(createErrorResponse("Contraseña requerida"));
             }
             
-            User usuarioCreado = userService.registerUser(email, nombreUsuario, contrasena);
+            User usuarioCreado = userService.registerUser(email, nombreUsuario, contrasena, ubicacion);
             
             Map<String, Object> response = new HashMap<>();
             response.put("idUsuario", usuarioCreado.getIdUsuario());

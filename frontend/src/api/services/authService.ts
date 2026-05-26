@@ -24,11 +24,12 @@ export const authService = {
     return data;
   },
 
-  register: async (email: string, username: string, password: string): Promise<LoginResponse> => {
+  register: async (email: string, username: string, password: string, ubicacion?: string): Promise<LoginResponse> => {
     const response = await axiosInstance.post<LoginResponse>('/usuarios/register', {
       email,
       nombreUsuario: username,
       contrasena: password,
+      ubicacion: ubicacion || '',
     });
     
     const data = response.data;

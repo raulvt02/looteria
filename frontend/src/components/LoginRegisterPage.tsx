@@ -124,7 +124,7 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
           return;
         }
 
-        await authService.register(registerData.email, registerData.username, registerData.password);
+        await authService.register(registerData.email, registerData.username, registerData.password, registerData.location);
         setMessage({ type: 'success', text: '¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.' });
         // Cambiar a modo de login después del registro
         setIsLogin(true);
