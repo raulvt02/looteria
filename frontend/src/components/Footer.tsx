@@ -81,14 +81,6 @@ export function Footer({ onNavigate }: FooterProps) {
                 </button>
               </li>
               <li>
-                <button
-                  onClick={() => onNavigate('faq')}
-                  className="text-gray-300 hover:text-white transition-colors text-sm"
-                >
-                  FAQ
-                </button>
-              </li>
-              <li>
                 <button className="text-gray-300 hover:text-white transition-colors text-sm">
                   Seguridad
                 </button>

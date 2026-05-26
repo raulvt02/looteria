@@ -37,41 +37,15 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
 
     try {
       if (isLogin) {
-        // Validaciones para login
+        // Validaciones para login - solo campos vacíos
         if (!loginData.email.trim()) {
           setMessage({ type: 'error', text: 'Por favor introduce tu email' });
           setLoading(false);
           return;
         }
 
-        // Validar formato de email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(loginData.email)) {
-          setMessage({ type: 'error', text: 'Por favor introduce un email válido' });
-          setLoading(false);
-          return;
-        }
-
         if (!loginData.password.trim()) {
           setMessage({ type: 'error', text: 'Por favor introduce tu contraseña' });
-          setLoading(false);
-          return;
-        }
-
-        if (loginData.password.length < 6) {
-          setMessage({ type: 'error', text: 'La contraseña debe tener al menos 6 caracteres' });
-          setLoading(false);
-          return;
-        }
-
-        if (!/[A-Z]/.test(loginData.password)) {
-          setMessage({ type: 'error', text: 'La contraseña debe tener al menos una mayúscula' });
-          setLoading(false);
-          return;
-        }
-
-        if (!/[!@#$%^&*(),.?":{}|<>]/.test(loginData.password)) {
-          setMessage({ type: 'error', text: 'La contraseña debe tener al menos un carácter especial (!@#$%^&*(),.?":{}|<>)' });
           setLoading(false);
           return;
         }
@@ -421,7 +395,10 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
                 ¿No tienes cuenta?{" "}
                 <button
                   type="button"
-                  onClick={() => setIsLogin(false)}
+                  onClick={() => {
+                    setIsLogin(false);
+                    setMessage(null);
+                  }}
                   className="text-primary font-medium hover:underline"
                 >
                   Regístrate aquí
@@ -432,7 +409,10 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
                 ¿Ya tienes cuenta?{" "}
                 <button
                   type="button"
-                  onClick={() => setIsLogin(true)}
+                  onClick={() => {
+                    setIsLogin(true);
+                    setMessage(null);
+                  }}
                   className="text-primary font-medium hover:underline"
                 >
                   Inicia sesión
