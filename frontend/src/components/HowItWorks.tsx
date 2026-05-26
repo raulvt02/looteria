@@ -5,7 +5,7 @@ export function HowItWorks() {
     {
       icon: Upload,
       title: "1. Crea tu publicación",
-      description: "Sube fotos y describe tus videojuegos, figuras, cómics o coleccionables que quieres vender o intercambiar.",
+      description: "Sube fotos y describe tus videojuegos o artículos de colección que quieres vender o intercambiar.",
       color: "from-primary to-blue-600",
     },
     {

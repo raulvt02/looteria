@@ -62,8 +62,6 @@ export function Filters({ onFilterChange }: FiltersProps) {
           >
             <option value="">Todos los tipos</option>
             <option value="videogame">Videojuegos</option>
-            <option value="figure">Figuras</option>
-            <option value="comic">Cómics</option>
             <option value="collectible">Coleccionables</option>
           </select>
         </div>
@@ -114,9 +112,7 @@ export function Filters({ onFilterChange }: FiltersProps) {
           <div className="flex flex-wrap gap-2">
             {selectedItemType && (
               <Badge className="bg-primary/10 text-primary border-0">
-                {selectedItemType === "videogame" ? "Videojuegos" :
-                 selectedItemType === "figure" ? "Figuras" :
-                 selectedItemType === "comic" ? "Cómics" : "Coleccionables"}
+                {selectedItemType === "videogame" ? "Videojuegos" : "Coleccionables"}
               </Badge>
             )}
             {selectedPlatform && (

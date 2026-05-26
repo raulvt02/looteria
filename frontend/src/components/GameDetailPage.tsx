@@ -24,6 +24,14 @@ interface Review {
   date: string;
 }
 
+const getItemTypeLabel = (value?: string) => {
+  if (!value) {
+    return "Coleccionable";
+  }
+
+  return value.toLowerCase() === "videogame" ? "Videojuego" : "Coleccionable";
+};
+
 export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameDetailPageProps) {
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [showExchangeModal, setShowExchangeModal] = useState(false);
@@ -62,7 +70,7 @@ export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameD
         franchise: listingData.tipoArticulo || "",
         releaseDate: listingData.fechaCreacion ? new Date(listingData.fechaCreacion).toLocaleDateString('es-ES') : "",
         estimatedValue: listingData.precio ? Math.round(listingData.precio * 1.2) : 0,
-        itemType: listingData.tipoArticulo || "Artículo",
+        itemType: getItemTypeLabel(listingData.tipoArticulo),
         language: listingData.idioma || "Desconocido",
         location: listingData.ubicacion || "España",
         rating: listingData.usuarioReputacion || 0,

@@ -1,4 +1,4 @@
-import { ArrowRight, Package, Shield, Star, Gamepad2 } from "lucide-react";
+import { ArrowRight, Package, Shield, Gamepad2, Sparkles } from "lucide-react";
 
 interface HeroProps {
   onNavigate: (page: string) => void;
@@ -9,8 +9,7 @@ const categories = [
   { name: "Xbox", icon: Gamepad2, color: "bg-green-100 text-green-600" },
   { name: "Switch", icon: Gamepad2, color: "bg-red-100 text-red-600" },
   { name: "PC", icon: Package, color: "bg-purple-100 text-purple-600" },
-  { name: "Figuras", icon: Star, color: "bg-yellow-100 text-yellow-600" },
-  { name: "Cómics", icon: Package, color: "bg-pink-100 text-pink-600" },
+  { name: "Coleccionables", icon: Sparkles, color: "bg-yellow-100 text-yellow-600" },
 ];
 
 export function Hero({ onNavigate }: HeroProps) {
@@ -36,7 +35,7 @@ export function Hero({ onNavigate }: HeroProps) {
           </h1>
 
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            La plataforma especializada en videojuegos, figuras, cómics y artículos de colección.
+            La plataforma especializada en videojuegos y artículos de colección.
             Encuentra lo que buscas, vende lo que no usas.
           </p>
 

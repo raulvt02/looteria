@@ -21,7 +21,7 @@ const listingToGame = (listing: SearchListing): any => ({
   rating: 4.5,
   price: listing.precio,
   type: listing.tipoTransaccion === "VENTA" ? "sale" : "exchange",
-  itemType: "videogame",
+  itemType: listing.tipoArticulo?.toLowerCase() === "videogame" ? "videogame" : "collectible",
   platform: listing.plataforma,
   description: listing.descripcion,
   user: listing.usuario,

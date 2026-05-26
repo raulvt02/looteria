@@ -25,8 +25,7 @@ export function Footer({ onNavigate }: FooterProps) {
             </div>
             <p className="text-gray-300 mb-4 text-sm">
               La plataforma especializada en compra-venta e intercambio de videojuegos, 
-              figuras, cómics y artículos de colección. Encuentra tesoros únicos y conecta 
-              con otros coleccionistas.
+              artículos de colección. Encuentra tesoros únicos y conecta con otros coleccionistas.
             </p>
             <div className="flex gap-4">
               <button className="w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-all">

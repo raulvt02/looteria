@@ -13,7 +13,7 @@ export interface Game {
   type?: "sale" | "exchange" | "both";
   platform?: string;
   franchise?: string;
-  itemType?: "videogame" | "figure" | "comic" | "collectible";
+  itemType?: "videogame" | "collectible";
 }
 
 interface GameCardProps {
@@ -25,8 +25,6 @@ export function GameCard({ game, onClick }: GameCardProps) {
   const getItemTypeLabel = (type?: string) => {
     switch (type) {
       case "videogame": return "Videojuego";
-      case "figure": return "Figura";
-      case "comic": return "Cómic";
       case "collectible": return "Coleccionable";
       default: return "Producto";
     }

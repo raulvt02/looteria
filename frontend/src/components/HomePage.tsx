@@ -51,7 +51,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
     rating: 4.5,
     price: dto.precio,
     type: dto.tipoTransaccion === 'VENTA' ? 'sale' : dto.tipoTransaccion === 'INTERCAMBIO' ? 'exchange' : 'both',
-    itemType: dto.tipoArticuloNombre.toLowerCase() as "videogame" | "figure" | "comic" | "collectible",
+    itemType: dto.tipoArticuloNombre?.toLowerCase() === "videogame" ? "videogame" : "collectible",
     platform: dto.plataformaNombre,
   });
 
