@@ -198,6 +198,13 @@ export const profileService = {
     return response.data;
   },
 
+  marcarIntercambioCompletado: async (exchangeId: number, userId: number): Promise<any> => {
+    const response = await axiosInstance.put(`/intercambios/${exchangeId}/completar`, {
+      userId,
+    });
+    return response.data;
+  },
+
   canjearPuntos: async (userId: number, tipoCanje: string): Promise<{ codigo: string; descripcion: string; puntosUsados: number; puntosRestantes: number }> => {
     const response = await axiosInstance.post('/perfil/canjear-puntos', { userId, tipoCanje });
     return response.data;

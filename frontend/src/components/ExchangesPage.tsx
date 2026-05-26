@@ -1,104 +1,254 @@
-import { useState } from "react";
-import { Package, Clock, CheckCircle, XCircle, MessageCircle } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Package, Clock, CheckCircle, XCircle, MessageCircle, Repeat } from "lucide-react";
 import { Footer } from "./Footer";
+import { useAuth } from "../context/AuthContext";
+import profileService from "../api/services/profileService";
+import { toast } from "sonner";
 
 interface ExchangesPageProps {
   onNavigate: (page: string) => void;
 }
 
-interface Exchange {
-  id: string;
-  gameOffered: string;
-  gameRequested: string;
-  otherUser: string;
-  status: "pending" | "accepted" | "rejected" | "completed";
-  date: string;
-  message: string;
-  imageOffered: string;
-  imageRequested: string;
+interface ExchangeDTO {
+  idIntercambio: number;
+  publicacionId: number;
+  publicacionTitulo: string;
+  publicacionImagen: string | null;
+  solicitanteId: number;
+  solicitanteNombre: string;
+  solicitadoId: number;
+  solicitadoNombre: string;
+  mensaje: string;
+  estado: "PENDIENTE" | "ACEPTADA" | "RECHAZADA" | "CANCELADA" | "COMPLETADA";
+  completadoPorSolicitante: boolean;
+  completadoPorSolicitado: boolean;
+  fechaCreacion: string;
 }
 
 export function ExchangesPage({ onNavigate }: ExchangesPageProps) {
-  const [activeTab, setActiveTab] = useState<"sent" | "received">("received");
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<"received" | "sent">("received");
+  const [received, setReceived] = useState<ExchangeDTO[]>([]);
+  const [sent, setSent] = useState<ExchangeDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
 
-  const exchanges: Exchange[] = [
-    {
-      id: "1",
-      gameOffered: "FIFA 24",
-      gameRequested: "God of War Ragnarök",
-      otherUser: "María García",
-      status: "pending",
-      date: "Hace 2 horas",
-      message: "Hola! Me interesa tu juego. Mi FIFA está en perfecto estado, con caja original.",
-      imageOffered: "https://images.unsplash.com/photo-1652734935726-7afd52076e7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aWRlbyUyMGdhbWUlMjBwbGF5fGVufDF8fHx8MTc2MjI4MDAxMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      imageRequested: "https://images.unsplash.com/photo-1641564341083-161e6aa17a8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1lciUyMHBsYXlpbmd8ZW58MXx8fHwxNzYyMjgwMDEzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    },
-    {
-      id: "2",
-      gameOffered: "Spider-Man 2",
-      gameRequested: "The Last of Us Part II",
-      otherUser: "Juan Pérez",
-      status: "pending",
-      date: "Hace 5 horas",
-      message: "Me encantaría intercambiar. ¿Quedamos en Madrid centro?",
-      imageOffered: "https://images.unsplash.com/photo-1593024579758-6221e85efbe6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwbGF5c3RhdGlvbiUyMGdhbWV8ZW58MXx8fHwxNzYyMjgwMDExfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      imageRequested: "https://images.unsplash.com/photo-1593024579758-6221e85efbe6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwbGF5c3RhdGlvbiUyMGdhbWV8ZW58MXx8fHwxNzYyMjgwMDExfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    },
-    {
-      id: "3",
-      gameOffered: "Zelda: Tears of Kingdom",
-      gameRequested: "Mario Kart 8",
-      otherUser: "Ana López",
-      status: "accepted",
-      date: "Hace 1 día",
-      message: "¡Perfecto! Nos vemos el sábado.",
-      imageOffered: "https://images.unsplash.com/photo-1612036781124-847f8939b154?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuaW50ZW5kbyUyMHN3aXRjaHxlbnwxfHx8fDE3NjIyMzc5MDd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      imageRequested: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXRybyUyMGdhbWluZ3xlbnwxfHx8fDE3NjIyODAwMTN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    },
-    {
-      id: "4",
-      gameOffered: "Halo Infinite",
-      gameRequested: "Forza Horizon 5",
-      otherUser: "Pedro Sánchez",
-      status: "completed",
-      date: "Hace 3 días",
-      message: "Intercambio completado. ¡Todo perfecto!",
-      imageOffered: "https://images.unsplash.com/photo-1631896928983-2c94ea6f97e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx4Ym94JTIwY29udHJvbGxlcnxlbnwxfHx8fDE3NjIyODAwMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-      imageRequested: "https://images.unsplash.com/photo-1655976796204-308e6f3deaa8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBjb25zb2xlJTIwY29udHJvbGxlcnxlbnwxfHx8fDE3NjIyMzc0OTN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    },
-  ];
-
-  const getStatusInfo = (status: Exchange["status"]) => {
-    switch (status) {
-      case "pending":
-        return {
-          icon: Clock,
-          text: "Pendiente",
-          color: "text-yellow-500",
-          bg: "bg-yellow-50",
-        };
-      case "accepted":
-        return {
-          icon: CheckCircle,
-          text: "Aceptado",
-          color: "text-green-500",
-          bg: "bg-green-50",
-        };
-      case "rejected":
-        return {
-          icon: XCircle,
-          text: "Rechazado",
-          color: "text-red-500",
-          bg: "bg-red-50",
-        };
-      case "completed":
-        return {
-          icon: Package,
-          text: "Completado",
-          color: "text-blue-500",
-          bg: "bg-blue-50",
-        };
+  const loadExchanges = useCallback(async () => {
+    if (!user?.idUsuario) return;
+    try {
+      setLoading(true);
+      const [recibidos, enviados] = await Promise.all([
+        profileService.getExchangesBySolicitado(user.idUsuario),
+        profileService.getExchangesBySolicitante(user.idUsuario),
+      ]);
+      setReceived(recibidos);
+      setSent(enviados);
+    } catch (err) {
+      toast.error("Error al cargar los intercambios");
+    } finally {
+      setLoading(false);
     }
+  }, [user?.idUsuario]);
+
+  useEffect(() => {
+    loadExchanges();
+  }, [loadExchanges]);
+
+  const handleUpdateStatus = async (id: number, estado: string) => {
+    setActionLoading(id);
+    try {
+      await profileService.updateExchangeStatus(id, estado);
+      toast.success(`Intercambio ${estado === "ACEPTADA" ? "aceptado" : "rechazado"} correctamente`);
+      await loadExchanges();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Error al actualizar el estado");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleMarcarCompletado = async (id: number) => {
+    if (!user?.idUsuario) return;
+    setActionLoading(id);
+    try {
+      const result = await profileService.marcarIntercambioCompletado(id, user.idUsuario);
+      if (result.estado === "COMPLETADA") {
+        toast.success("¡Intercambio completado! Ambos usuarios han recibido 50 puntos.");
+      } else {
+        toast.success("Has marcado tu parte como completada. Esperando confirmación del otro usuario.");
+      }
+      await loadExchanges();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Error al marcar como completado");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const getStatusInfo = (estado: ExchangeDTO["estado"]) => {
+    switch (estado) {
+      case "PENDIENTE":
+        return { icon: Clock, text: "Pendiente", color: "text-yellow-500", bg: "bg-yellow-50" };
+      case "ACEPTADA":
+        return { icon: CheckCircle, text: "Aceptada", color: "text-green-500", bg: "bg-green-50" };
+      case "RECHAZADA":
+        return { icon: XCircle, text: "Rechazada", color: "text-red-500", bg: "bg-red-50" };
+      case "CANCELADA":
+        return { icon: XCircle, text: "Cancelada", color: "text-gray-500", bg: "bg-gray-50" };
+      case "COMPLETADA":
+        return { icon: Package, text: "Completada", color: "text-blue-500", bg: "bg-blue-50" };
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "";
+    try {
+      return new Date(dateStr).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const getImageUrl = (ruta: string | null) => {
+    if (!ruta) return "https://images.unsplash.com/photo-1593024579758-6221e85efbe6?w=400&q=80";
+    return ruta.startsWith("/") ? `${import.meta.env.VITE_API_URL}${ruta}` : ruta;
+  };
+
+  const activeExchanges = activeTab === "received" ? received : sent;
+  const pendingCount = received.filter((e) => e.estado === "PENDIENTE").length;
+
+  const renderExchangeCard = (exchange: ExchangeDTO) => {
+    const statusInfo = getStatusInfo(exchange.estado);
+    const StatusIcon = statusInfo.icon;
+    const isReceived = activeTab === "received";
+    const otherUserName = isReceived ? exchange.solicitanteNombre : exchange.solicitadoNombre;
+    const isLoading = actionLoading === exchange.idIntercambio;
+
+    const yaMarcaste = isReceived
+      ? exchange.completadoPorSolicitado
+      : exchange.completadoPorSolicitante;
+
+    return (
+      <div key={exchange.idIntercambio} className="bg-white rounded-[10px] shadow-md hover:shadow-xl transition-all overflow-hidden">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#007BFF] to-[#00FFC6] flex items-center justify-center">
+                <span className="text-white font-bold">{otherUserName?.[0]?.toUpperCase() || "?"}</span>
+              </div>
+              <div>
+                <p className="text-[#1A1A1A] font-bold">{otherUserName}</p>
+                <p className="text-gray-500 text-sm">{formatDate(exchange.fechaCreacion)}</p>
+              </div>
+            </div>
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${statusInfo.bg}`}>
+              <StatusIcon className={`w-4 h-4 ${statusInfo.color}`} />
+              <span className={`${statusInfo.color} text-sm font-semibold`}>{statusInfo.text}</span>
+            </div>
+          </div>
+
+          {/* Publication info */}
+          <div className="flex gap-4 mb-4">
+            <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+              <img
+                src={getImageUrl(exchange.publicacionImagen)}
+                alt={exchange.publicacionTitulo}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1">
+              <p className="text-gray-500 text-sm font-semibold mb-1">
+                {isReceived ? "Quiere tu publicación" : "Publicación solicitada"}
+              </p>
+              <button
+                onClick={() => onNavigate(`game:${exchange.publicacionId}`)}
+                className="text-[#1A1A1A] font-bold hover:text-[#007BFF] transition-colors text-left"
+              >
+                {exchange.publicacionTitulo}
+              </button>
+              <div className="flex items-center gap-1 mt-2">
+                <Repeat className="w-4 h-4 text-purple-600" />
+                <span className="text-purple-600 text-sm font-medium">Intercambio</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Message */}
+          {exchange.mensaje && (
+            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+              <div className="flex items-start gap-2">
+                <MessageCircle className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+                <p className="text-gray-700 text-sm">{exchange.mensaje}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Completion progress for ACEPTADA */}
+          {exchange.estado === "ACEPTADA" && (
+            <div className="flex gap-4 mb-4 text-sm">
+              <div className={`flex items-center gap-1 ${exchange.completadoPorSolicitante ? "text-green-600" : "text-gray-400"}`}>
+                <CheckCircle className="w-4 h-4" />
+                <span>{exchange.solicitanteNombre}</span>
+              </div>
+              <div className={`flex items-center gap-1 ${exchange.completadoPorSolicitado ? "text-green-600" : "text-gray-400"}`}>
+                <CheckCircle className="w-4 h-4" />
+                <span>{exchange.solicitadoNombre}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          {exchange.estado === "PENDIENTE" && isReceived && (
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleUpdateStatus(exchange.idIntercambio, "ACEPTADA")}
+                disabled={isLoading}
+                className="flex-1 py-2 px-6 rounded-full bg-gradient-to-r from-[#FF2D92] to-[#A100FF] text-white hover:shadow-lg transition-all font-semibold disabled:opacity-50"
+              >
+                {isLoading ? "..." : "Aceptar"}
+              </button>
+              <button
+                onClick={() => handleUpdateStatus(exchange.idIntercambio, "RECHAZADA")}
+                disabled={isLoading}
+                className="flex-1 py-2 px-6 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all font-semibold disabled:opacity-50"
+              >
+                Rechazar
+              </button>
+            </div>
+          )}
+
+          {exchange.estado === "PENDIENTE" && !isReceived && (
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleUpdateStatus(exchange.idIntercambio, "CANCELADA")}
+                disabled={isLoading}
+                className="flex-1 py-2 px-6 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all font-semibold disabled:opacity-50"
+              >
+                Cancelar solicitud
+              </button>
+            </div>
+          )}
+
+          {exchange.estado === "ACEPTADA" && (
+            <div className="flex gap-3">
+              {yaMarcaste ? (
+                <div className="flex-1 py-2 px-6 rounded-full bg-green-50 text-green-600 text-center font-semibold text-sm">
+                  ✓ Ya marcaste como completado — esperando al otro usuario
+                </div>
+              ) : (
+                <button
+                  onClick={() => handleMarcarCompletado(exchange.idIntercambio)}
+                  disabled={isLoading}
+                  className="flex-1 py-2 px-6 rounded-full bg-gradient-to-r from-[#007BFF] to-[#00FFC6] text-white hover:shadow-lg transition-all font-semibold disabled:opacity-50"
+                >
+                  {isLoading ? "..." : "Marcar como completado"}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -128,7 +278,7 @@ export function ExchangesPage({ onNavigate }: ExchangesPageProps) {
             }`}
             style={{ fontWeight: "600" }}
           >
-            Recibidas ({exchanges.filter((e) => e.status === "pending").length})
+            Recibidas {pendingCount > 0 && `(${pendingCount})`}
           </button>
           <button
             onClick={() => setActiveTab("sent")}
@@ -143,142 +293,32 @@ export function ExchangesPage({ onNavigate }: ExchangesPageProps) {
           </button>
         </div>
 
+        {/* Loading */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#007BFF] mx-auto mb-4"></div>
+            <p className="text-gray-600">Cargando intercambios...</p>
+          </div>
+        )}
+
         {/* Exchange Cards */}
-        <div className="space-y-6">
-          {exchanges.map((exchange) => {
-            const statusInfo = getStatusInfo(exchange.status);
-            const StatusIcon = statusInfo.icon;
-
-            return (
-              <div
-                key={exchange.id}
-                className="bg-white rounded-[10px] shadow-md hover:shadow-xl transition-all overflow-hidden"
-              >
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#007BFF] to-[#00FFC6] flex items-center justify-center">
-                        <span className="text-white" style={{ fontWeight: "700" }}>
-                          {exchange.otherUser[0]}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-[#1A1A1A]" style={{ fontWeight: "700" }}>
-                          {exchange.otherUser}
-                        </p>
-                        <p className="text-gray-500" style={{ fontSize: "0.875rem" }}>
-                          {exchange.date}
-                        </p>
-                      </div>
-                    </div>
-                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${statusInfo.bg}`}>
-                      <StatusIcon className={`w-4 h-4 ${statusInfo.color}`} />
-                      <span className={statusInfo.color} style={{ fontSize: "0.875rem", fontWeight: "600" }}>
-                        {statusInfo.text}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Exchange Details */}
-                  <div className="grid md:grid-cols-3 gap-6 mb-4">
-                    {/* Game Offered */}
-                    <div>
-                      <p className="text-gray-500 mb-2" style={{ fontSize: "0.875rem", fontWeight: "600" }}>
-                        Ofrece
-                      </p>
-                      <div className="relative h-32 rounded-lg overflow-hidden mb-2">
-                        <img
-                          src={exchange.imageOffered}
-                          alt={exchange.gameOffered}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <p className="text-[#1A1A1A]" style={{ fontWeight: "600" }}>
-                        {exchange.gameOffered}
-                      </p>
-                    </div>
-
-                    {/* Arrow */}
-                    <div className="flex items-center justify-center">
-                      <div className="text-[#FF2D92]" style={{ fontSize: "2rem" }}>
-                        ⇄
-                      </div>
-                    </div>
-
-                    {/* Game Requested */}
-                    <div>
-                      <p className="text-gray-500 mb-2" style={{ fontSize: "0.875rem", fontWeight: "600" }}>
-                        Por
-                      </p>
-                      <div className="relative h-32 rounded-lg overflow-hidden mb-2">
-                        <img
-                          src={exchange.imageRequested}
-                          alt={exchange.gameRequested}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <p className="text-[#1A1A1A]" style={{ fontWeight: "600" }}>
-                        {exchange.gameRequested}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Message */}
-                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                    <div className="flex items-start gap-2">
-                      <MessageCircle className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
-                      <p className="text-gray-700" style={{ fontSize: "0.9375rem" }}>
-                        {exchange.message}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  {exchange.status === "pending" && activeTab === "received" && (
-                    <div className="flex gap-3">
-                      <button className="flex-1 py-2 px-6 rounded-full bg-gradient-to-r from-[#FF2D92] to-[#A100FF] text-white hover:shadow-lg transition-all" style={{ fontWeight: "600" }}>
-                        Aceptar intercambio
-                      </button>
-                      <button className="flex-1 py-2 px-6 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all" style={{ fontWeight: "600" }}>
-                        Rechazar
-                      </button>
-                      <button className="py-2 px-6 rounded-full bg-white border-2 border-[#007BFF] text-[#007BFF] hover:bg-[#007BFF] hover:text-white transition-all" style={{ fontWeight: "600" }}>
-                        Mensaje
-                      </button>
-                    </div>
-                  )}
-
-                  {exchange.status === "accepted" && (
-                    <div className="flex gap-3">
-                      <button className="flex-1 py-2 px-6 rounded-full bg-gradient-to-r from-[#007BFF] to-[#00FFC6] text-white hover:shadow-lg transition-all" style={{ fontWeight: "600" }}>
-                        Marcar como completado
-                      </button>
-                      <button className="py-2 px-6 rounded-full bg-white border-2 border-[#007BFF] text-[#007BFF] hover:bg-[#007BFF] hover:text-white transition-all" style={{ fontWeight: "600" }}>
-                        Enviar mensaje
-                      </button>
-                    </div>
-                  )}
-
-                  {exchange.status === "completed" && (
-                    <button className="w-full py-2 px-6 rounded-full bg-gradient-to-r from-[#007BFF] to-[#00FFC6] text-white hover:shadow-lg transition-all" style={{ fontWeight: "600" }}>
-                      Dejar valoración
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {!loading && (
+          <div className="space-y-6">
+            {activeExchanges.map(renderExchangeCard)}
+          </div>
+        )}
 
         {/* Empty State */}
-        {exchanges.length === 0 && (
+        {!loading && activeExchanges.length === 0 && (
           <div className="bg-white rounded-[10px] shadow-md p-12 text-center">
             <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-[#1A1A1A] mb-2" style={{ fontSize: "1.25rem", fontWeight: "700" }}>
               No hay intercambios
             </h3>
             <p className="text-gray-600 mb-6">
-              Empieza a explorar juegos y propón intercambios
+              {activeTab === "received"
+                ? "Nadie ha solicitado intercambiar contigo todavía"
+                : "Todavía no has enviado ninguna solicitud de intercambio"}
             </p>
             <button
               onClick={() => onNavigate("explore")}
@@ -291,7 +331,7 @@ export function ExchangesPage({ onNavigate }: ExchangesPageProps) {
         )}
       </div>
 
-      <Footer />
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 }

@@ -28,6 +28,7 @@ export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameD
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [showExchangeModal, setShowExchangeModal] = useState(false);
   const [exchangeMessage, setExchangeMessage] = useState("");
+  const [exchangeLoading, setExchangeLoading] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +66,7 @@ export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameD
         language: listingData.idioma || "Desconocido",
         location: listingData.ubicacion || "España",
         rating: listingData.usuarioReputacion || 0,
-        transactionType: listingData.tipoTransaccion === "both" ? "both" : "sale",
+        transactionType: listingData.tipoTransaccion === "INTERCAMBIO" ? "exchange" : "sale",
         vendedorId: listingData.idUsuario || listingData.usuarioId,
         idPublicacion: parseInt(gameId, 10),
         seller: {
@@ -178,10 +179,27 @@ export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameD
     }
   };
 
-  const confirmExchange = () => {
-    toast.success("Propuesta de intercambio enviada correctamente");
-    setShowExchangeModal(false);
-    setExchangeMessage("");
+  const confirmExchange = async () => {
+    if (!user?.idUsuario || !gameData) return;
+    if (!exchangeMessage.trim()) {
+      toast.error("El mensaje es obligatorio");
+      return;
+    }
+    setExchangeLoading(true);
+    try {
+      await profileService.createExchange(
+        gameData.idPublicacion,
+        user.idUsuario,
+        exchangeMessage
+      );
+      toast.success("Solicitud de intercambio enviada correctamente");
+      setShowExchangeModal(false);
+      setExchangeMessage("");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Error al enviar la solicitud");
+    } finally {
+      setExchangeLoading(false);
+    }
   };
 
   return (
@@ -293,36 +311,38 @@ export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameD
 
               <div className="bg-gradient-to-r from-primary/10 to-blue-50 rounded-xl p-6 mb-6">
                 <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-4xl font-bold text-primary">{gameData.price}€</span>
+                  {gameData.transactionType === "exchange" ? (
+                    <div className="flex items-center gap-2">
+                      <Repeat className="w-7 h-7 text-purple-600" />
+                      <span className="text-4xl font-bold text-purple-600">Intercambio</span>
+                    </div>
+                  ) : (
+                    <span className="text-4xl font-bold text-primary">{gameData.price}€</span>
+                  )}
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="space-y-3">
-                {gameData.transactionType !== "exchange" && (
-                  user?.idUsuario === gameData.vendedorId ? (
-                    <div className="w-full bg-gray-100 text-gray-500 text-center py-4 rounded-lg text-sm">
-                      Esta es tu publicación
-                    </div>
-                  ) : (
-                    <Button
-                      onClick={handleBuy}
-                      className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg"
-                    >
-                      <ShoppingCart className="w-5 h-5 mr-2" />
-                      Comprar ahora
-                    </Button>
-                  )
-                )}
-                
-                {(gameData.transactionType === "exchange" || gameData.transactionType === "both") && (
+                {user?.idUsuario === gameData.vendedorId ? (
+                  <div className="w-full bg-gray-100 text-gray-500 text-center py-4 rounded-lg text-sm">
+                    Esta es tu publicación
+                  </div>
+                ) : gameData.transactionType === "exchange" ? (
                   <Button
                     onClick={handleExchange}
-                    variant="outline"
-                    className="w-full border-primary text-primary hover:bg-primary hover:text-white py-6 text-lg"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg"
                   >
                     <Repeat className="w-5 h-5 mr-2" />
-                    Proponer intercambio
+                    Solicitar intercambio
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleBuy}
+                    className="w-full bg-primary hover:bg-primary/90 text-white py-6 text-lg"
+                  >
+                    <ShoppingCart className="w-5 h-5 mr-2" />
+                    Comprar ahora
                   </Button>
                 )}
               </div>
@@ -528,40 +548,36 @@ export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameD
       <Dialog open={showExchangeModal} onOpenChange={setShowExchangeModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Proponer intercambio</DialogTitle>
+            <DialogTitle>Solicitar intercambio</DialogTitle>
             <DialogDescription>
-              Selecciona el producto que quieres intercambiar y añade un mensaje
+              Envía una solicitud al propietario de "{gameData?.title}"
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tu producto para intercambiar
-              </label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-                <option>Selecciona un producto de tu colección</option>
-                <option>God of War Ragnarök - PS5</option>
-                <option>FIFA 24 - PS5</option>
-                <option>Elden Ring - PC</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mensaje (opcional)
+                Mensaje <span className="text-red-500">*</span>
               </label>
               <Textarea
                 value={exchangeMessage}
                 onChange={(e) => setExchangeMessage(e.target.value)}
-                placeholder="Cuéntale al vendedor por qué te interesa este intercambio..."
+                placeholder="Cuéntale al propietario qué te interesa de este intercambio..."
                 rows={4}
               />
             </div>
+            {!user && (
+              <p className="text-sm text-red-500">Debes iniciar sesión para solicitar un intercambio</p>
+            )}
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setShowExchangeModal(false)} className="flex-1">
                 Cancelar
               </Button>
-              <Button onClick={confirmExchange} className="flex-1 bg-primary">
-                Enviar propuesta
+              <Button
+                onClick={confirmExchange}
+                className="flex-1 bg-purple-600 hover:bg-purple-700"
+                disabled={exchangeLoading || !exchangeMessage.trim()}
+              >
+                {exchangeLoading ? "Enviando..." : "Enviar solicitud"}
               </Button>
             </div>
           </div>

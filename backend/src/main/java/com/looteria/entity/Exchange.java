@@ -35,7 +35,13 @@ public class Exchange {
     @Column(name = "estado", nullable = false)
     @Enumerated(EnumType.STRING)
     private ExchangeStatus estado = ExchangeStatus.PENDIENTE;
-    
+
+    @Column(name = "completado_por_solicitante")
+    private Boolean completadoPorSolicitante = false;
+
+    @Column(name = "completado_por_solicitado")
+    private Boolean completadoPorSolicitado = false;
+
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
 
@@ -48,6 +54,7 @@ public class Exchange {
         PENDIENTE,
         ACEPTADA,
         RECHAZADA,
-        CANCELADA
+        CANCELADA,
+        COMPLETADA
     }
 }
