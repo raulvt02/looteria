@@ -309,18 +309,13 @@ export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameD
                 )}
               </div>
 
-              <div className="bg-gradient-to-r from-primary/10 to-blue-50 rounded-xl p-6 mb-6">
-                <div className="flex items-baseline gap-2 mb-2">
-                  {gameData.transactionType === "exchange" ? (
-                    <div className="flex items-center gap-2">
-                      <Repeat className="w-7 h-7 text-purple-600" />
-                      <span className="text-4xl font-bold text-purple-600">Intercambio</span>
-                    </div>
-                  ) : (
+              {gameData.transactionType !== "exchange" && (
+                <div className="bg-gradient-to-r from-primary/10 to-blue-50 rounded-xl p-6 mb-6">
+                  <div className="flex items-baseline gap-2 mb-2">
                     <span className="text-4xl font-bold text-primary">{gameData.price}€</span>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Action Buttons */}
               <div className="space-y-3">
