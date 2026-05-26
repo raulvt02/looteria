@@ -14,7 +14,11 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
   const [isLogin, setIsLogin] = useState(initialMode === "login");
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
-  const [formData, setFormData] = useState({
+  const [loginData, setLoginData] = useState({
+    email: "",
+    password: "",
+  });
+  const [registerData, setRegisterData] = useState({
     username: "",
     email: "",
     location: "",
@@ -34,7 +38,7 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
     try {
       if (isLogin) {
         // Validaciones para login
-        if (!formData.email.trim()) {
+        if (!loginData.email.trim()) {
           setMessage({ type: 'error', text: 'Por favor introduce tu email' });
           setLoading(false);
           return;
@@ -42,55 +46,55 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
 
         // Validar formato de email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email)) {
+        if (!emailRegex.test(loginData.email)) {
           setMessage({ type: 'error', text: 'Por favor introduce un email válido' });
           setLoading(false);
           return;
         }
 
-        if (!formData.password.trim()) {
+        if (!loginData.password.trim()) {
           setMessage({ type: 'error', text: 'Por favor introduce tu contraseña' });
           setLoading(false);
           return;
         }
 
-        if (formData.password.length < 6) {
+        if (loginData.password.length < 6) {
           setMessage({ type: 'error', text: 'La contraseña debe tener al menos 6 caracteres' });
           setLoading(false);
           return;
         }
 
-        if (!/[A-Z]/.test(formData.password)) {
+        if (!/[A-Z]/.test(loginData.password)) {
           setMessage({ type: 'error', text: 'La contraseña debe tener al menos una mayúscula' });
           setLoading(false);
           return;
         }
 
-        if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(loginData.password)) {
           setMessage({ type: 'error', text: 'La contraseña debe tener al menos un carácter especial (!@#$%^&*(),.?":{}|<>)' });
           setLoading(false);
           return;
         }
 
-        const result = await authService.login(formData.email, formData.password);
+        const result = await authService.login(loginData.email, loginData.password);
         login(result, result.token || "");
         setMessage({ type: 'success', text: 'Login exitoso. Redirigiendo...' });
         setTimeout(() => onNavigate('home'), 1500);
       } else {
         // Validaciones para registro
-        if (!formData.username.trim()) {
+        if (!registerData.username.trim()) {
           setMessage({ type: 'error', text: 'Por favor introduce tu nombre de usuario' });
           setLoading(false);
           return;
         }
 
-        if (formData.username.length < 3) {
+        if (registerData.username.length < 3) {
           setMessage({ type: 'error', text: 'El nombre de usuario debe tener al menos 3 caracteres' });
           setLoading(false);
           return;
         }
 
-        if (!formData.email.trim()) {
+        if (!registerData.email.trim()) {
           setMessage({ type: 'error', text: 'Por favor introduce tu email' });
           setLoading(false);
           return;
@@ -98,58 +102,70 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
 
         // Validar formato de email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email)) {
+        if (!emailRegex.test(registerData.email)) {
           setMessage({ type: 'error', text: 'Por favor introduce un email válido' });
           setLoading(false);
           return;
         }
 
-        if (!formData.location.trim()) {
+        if (!registerData.location.trim()) {
           setMessage({ type: 'error', text: 'Por favor introduce tu ubicación' });
           setLoading(false);
           return;
         }
 
-        if (!formData.password.trim()) {
+        if (!registerData.password.trim()) {
           setMessage({ type: 'error', text: 'Por favor introduce tu contraseña' });
           setLoading(false);
           return;
         }
 
-        if (formData.password.length < 6) {
+        if (registerData.password.length < 6) {
           setMessage({ type: 'error', text: 'La contraseña debe tener al menos 6 caracteres' });
           setLoading(false);
           return;
         }
 
-        if (!/[A-Z]/.test(formData.password)) {
+        if (!/[A-Z]/.test(registerData.password)) {
           setMessage({ type: 'error', text: 'La contraseña debe tener al menos una mayúscula' });
           setLoading(false);
           return;
         }
 
-        if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(registerData.password)) {
           setMessage({ type: 'error', text: 'La contraseña debe tener al menos un carácter especial (!@#$%^&*(),.?":{}|<>)' });
           setLoading(false);
           return;
         }
 
-        if (formData.password !== formData.confirmPassword) {
+        if (registerData.password !== registerData.confirmPassword) {
           setMessage({ type: 'error', text: 'Las contraseñas no coinciden' });
           setLoading(false);
           return;
         }
 
-        if (!formData.acceptTerms) {
+        if (!registerData.acceptTerms) {
           setMessage({ type: 'error', text: 'Debes aceptar los términos y condiciones' });
           setLoading(false);
           return;
         }
 
-        const result = await authService.register(formData.email, formData.username, formData.password);
-        login(result, result.token || "");
-        setMessage({ type: 'success', text: '¡Cuenta creada exitosamente! Redirigiendo...' });
-        setTimeout(() => onNavigate('home'), 1500);
+        await authService.register(registerData.email, registerData.username, registerData.password);
+        setMessage({ type: 'success', text: '¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.' });
+        // Cambiar a modo de login después del registro
+        setIsLogin(true);
+        // Copiar email al formulario de login
+        setLoginData({ email: registerData.email, password: "" });
+        // Limpiar formulario de registro
+        setRegisterData({
+          username: "",
+          email: "",
+          location: "",
+          password: "",
+          confirmPassword: "",
+          acceptTerms: false,
+        });
+        setLoading(false);
       }
     } catch (error: any) {
       setMessage({ type: 'error', text: error.response?.data?.message || 'Error de conexión con el servidor' });
@@ -233,9 +249,9 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
-                    value={formData.username}
+                    value={registerData.username}
                     onChange={(e) =>
-                      setFormData({ ...formData, username: e.target.value })
+                      setRegisterData({ ...registerData, username: e.target.value })
                     }
                     placeholder="Tu nombre de usuario"
                     className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
@@ -253,9 +269,11 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="email"
-                  value={formData.email}
+                  value={isLogin ? loginData.email : registerData.email}
                   onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
+                    isLogin
+                      ? setLoginData({ ...loginData, email: e.target.value })
+                      : setRegisterData({ ...registerData, email: e.target.value })
                   }
                   placeholder="tu@email.com"
                   className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
@@ -273,9 +291,9 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
-                    value={formData.location}
+                    value={registerData.location}
                     onChange={(e) =>
-                      setFormData({ ...formData, location: e.target.value })
+                      setRegisterData({ ...registerData, location: e.target.value })
                     }
                     placeholder="Tu ciudad"
                     className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
@@ -293,9 +311,11 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  value={formData.password}
+                  value={isLogin ? loginData.password : registerData.password}
                   onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
+                    isLogin
+                      ? setLoginData({ ...loginData, password: e.target.value })
+                      : setRegisterData({ ...registerData, password: e.target.value })
                   }
                   placeholder="••••••••"
                   className="w-full pl-10 pr-12 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
@@ -324,9 +344,9 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type={showPassword ? "text" : "password"}
-                    value={formData.confirmPassword}
+                    value={registerData.confirmPassword}
                     onChange={(e) =>
-                      setFormData({ ...formData, confirmPassword: e.target.value })
+                      setRegisterData({ ...registerData, confirmPassword: e.target.value })
                     }
                     placeholder="••••••••"
                     className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
@@ -358,9 +378,9 @@ export function LoginRegisterPage({ onNavigate, initialMode = "login" }: LoginRe
               <div className="space-y-3">
                 <label className="flex items-start gap-3">
                   <Checkbox
-                    checked={formData.acceptTerms}
+                    checked={registerData.acceptTerms}
                     onCheckedChange={(checked: boolean) =>
-                      setFormData({ ...formData, acceptTerms: !!checked })
+                      setRegisterData({ ...registerData, acceptTerms: !!checked })
                     }
                     className="mt-1"
                   />
