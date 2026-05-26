@@ -66,15 +66,40 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
       const reviews = await profileService.getReceivedReviews(user!.idUsuario!);
       setReceivedReviews(reviews);
 
-      const [asBuyer, asSeller] = await Promise.all([
+      const [asBuyer, asSeller, asSolicitante, asSolicitado] = await Promise.all([
         profileService.getTransactionsByBuyer(user!.idUsuario!),
         profileService.getTransactionsBySeller(user!.idUsuario!),
+        profileService.getExchangesBySolicitante(user!.idUsuario!),
+        profileService.getExchangesBySolicitado(user!.idUsuario!),
       ]);
+
+      const completedExchanges = [
+        ...asSolicitante.filter((e: any) => e.estado === "COMPLETADA").map((e: any) => ({
+          ...e,
+          tipo: "INTERCAMBIO",
+          rol: "solicitante",
+          fechaTransaccion: e.fechaCreacion,
+          titulo: e.publicacionTitulo,
+          imagen: e.publicacionImagen,
+          otroUsuario: e.solicitadoNombre,
+        })),
+        ...asSolicitado.filter((e: any) => e.estado === "COMPLETADA").map((e: any) => ({
+          ...e,
+          tipo: "INTERCAMBIO",
+          rol: "solicitado",
+          fechaTransaccion: e.fechaCreacion,
+          titulo: e.publicacionTitulo,
+          imagen: e.publicacionImagen,
+          otroUsuario: e.solicitanteNombre,
+        })),
+      ];
+
       const merged = [
-        ...asBuyer.map((t: any) => ({ ...t, rol: "comprador" })),
+        ...asBuyer.map((t: any) => ({ ...t, rol: "comprador", tipo: "VENTA" })),
         ...asSeller
           .filter((t: any) => !asBuyer.some((b: any) => b.idTransaccion === t.idTransaccion))
-          .map((t: any) => ({ ...t, rol: "vendedor" })),
+          .map((t: any) => ({ ...t, rol: "vendedor", tipo: "VENTA" })),
+        ...completedExchanges,
       ].sort((a, b) => new Date(b.fechaTransaccion).getTime() - new Date(a.fechaTransaccion).getTime());
       setTransactions(merged);
     } catch (error) {
@@ -769,7 +794,11 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                           </Badge>
                         </div>
                         <div className="flex items-center gap-6 text-sm text-gray-600 mb-4">
-                          <span className="text-2xl font-bold text-primary">{listing.precio}€</span>
+                          {listing.tipoTransaccion === "INTERCAMBIO" ? (
+                            <span className="text-2xl font-bold text-purple-600">Intercambio</span>
+                          ) : (
+                            <span className="text-2xl font-bold text-primary">{listing.precio}€</span>
+                          )}
                           <span>{new Date(listing.fechaCreacion.split('T')[0]).toLocaleDateString('es-ES')}</span>
                         </div>
                         <div className="flex gap-2">
@@ -829,18 +858,26 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {transactions.map((t) => (
-                      <tr key={t.idTransaccion} className="hover:bg-gray-50">
+                      <tr key={t.idTransaccion || t.idIntercambio} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <Badge className={t.rol === "vendedor" ? "bg-green-100 text-green-700 border-0" : "bg-blue-100 text-blue-700 border-0"}>
-                            {t.rol === "vendedor" ? "Venta" : "Compra"}
-                          </Badge>
+                          {t.tipo === "INTERCAMBIO" ? (
+                            <Badge className="bg-purple-100 text-purple-700 border-0">Intercambio</Badge>
+                          ) : (
+                            <Badge className={t.rol === "vendedor" ? "bg-green-100 text-green-700 border-0" : "bg-blue-100 text-blue-700 border-0"}>
+                              {t.rol === "vendedor" ? "Venta" : "Compra"}
+                            </Badge>
+                          )}
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{t.productoTitulo || "Producto"}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{t.titulo || t.productoTitulo || "Producto"}</td>
                         <td className="px-6 py-4 text-sm text-gray-600">
-                          {t.rol === "vendedor" ? t.compradorNombre : t.vendedorNombre}
+                          {t.tipo === "INTERCAMBIO" ? t.otroUsuario : (t.rol === "vendedor" ? t.compradorNombre : t.vendedorNombre)}
                         </td>
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                          {t.precioFinal > 0 ? `${t.precioFinal}€` : "-"}
+                          {t.tipo === "INTERCAMBIO" ? (
+                            <span className="text-purple-600">Intercambio</span>
+                          ) : (
+                            t.precioFinal > 0 ? `${t.precioFinal}€` : "-"
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {t.estado === "COMPLETADA" && <Badge className="bg-green-100 text-green-700 border-0">Completado</Badge>}
@@ -852,7 +889,7 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                           {t.fechaTransaccion ? new Date(t.fechaTransaccion).toLocaleDateString("es-ES") : "-"}
                         </td>
                         <td className="px-6 py-4">
-                          {t.rol === "vendedor" && t.estado === "PENDIENTE" && (
+                          {t.tipo !== "INTERCAMBIO" && t.rol === "vendedor" && t.estado === "PENDIENTE" && (
                             <Button
                               size="sm"
                               variant="outline"
