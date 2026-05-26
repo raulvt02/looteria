@@ -975,7 +975,7 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                 className={`px-6 py-3 rounded-full transition-all ${
                   exchangeActiveTab === "received"
                     ? "bg-blue-500 text-white"
-                    : "bg-gray-100 text-primary hover:bg-gray-200"
+                    : "bg-primary/10 text-primary hover:bg-primary/20"
                 }`}
               >
                 Recibidas {exchangesReceived.filter((e) => e.estado === "PENDIENTE").length > 0 && `(${exchangesReceived.filter((e) => e.estado === "PENDIENTE").length})`}
@@ -985,7 +985,7 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                 className={`px-6 py-3 rounded-full transition-all ${
                   exchangeActiveTab === "sent"
                     ? "bg-blue-500 text-white"
-                    : "bg-gray-100 text-primary hover:bg-gray-200"
+                    : "bg-primary/10 text-primary hover:bg-primary/20"
                 }`}
               >
                 Enviadas
