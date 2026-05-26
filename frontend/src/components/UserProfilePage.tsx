@@ -842,7 +842,7 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                           {listing.tipoTransaccion === "INTERCAMBIO" ? (
                             <span className="text-2xl font-bold text-blue-600">Intercambio</span>
                           ) : (
-                            <span className="text-2xl font-bold text-primary">{listing.precio}€</span>
+                            <span className="text-2xl font-bold text-blue-600">{listing.precio}€</span>
                           )}
                           <span>{new Date(listing.fechaCreacion.split('T')[0]).toLocaleDateString('es-ES')}</span>
                         </div>
@@ -919,7 +919,7 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                         </td>
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">
                           {t.tipo === "INTERCAMBIO" ? (
-                            <span className="text-blue-600">Intercambio</span>
+                            <span>Intercambio</span>
                           ) : (
                             t.precioFinal > 0 ? `${t.precioFinal}€` : "-"
                           )}
