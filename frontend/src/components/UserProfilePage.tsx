@@ -41,11 +41,6 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
   const [canjeLoading, setCanjeLoading] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [updatingTx, setUpdatingTx] = useState<number | null>(null);
-  const [isVerified, setIsVerified] = useState<boolean>(false);
-  const [showVerificationModal, setShowVerificationModal] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
-  const [sendingCode, setSendingCode] = useState(false);
-  const [verifyingCode, setVerifyingCode] = useState(false);
   
   // Exchange states
   const [exchangeActiveTab, setExchangeActiveTab] = useState<"received" | "sent">("received");
@@ -57,7 +52,6 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
   useEffect(() => {
     if (user?.idUsuario) {
       loadProfileData();
-      loadVerificationStatus();
     }
   }, [user]);
 
@@ -121,46 +115,6 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
     }
   };
 
-  const loadVerificationStatus = async () => {
-    try {
-      const { verificado } = await profileService.getEstadoVerificacion(user!.idUsuario!);
-      setIsVerified(verificado);
-    } catch (error) {
-      console.error("Error loading verification status:", error);
-    }
-  };
-
-  const handleSendVerificationCode = async () => {
-    setSendingCode(true);
-    try {
-      await profileService.enviarCodigoVerificacion(user!.idUsuario!);
-      toast.success("Código enviado a tu email. Revisa tu bandeja de entrada.");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.error || "Error al enviar el código");
-    } finally {
-      setSendingCode(false);
-    }
-  };
-
-  const handleVerifyCode = async () => {
-    if (!verificationCode) {
-      toast.error("Introduce el código de verificación");
-      return;
-    }
-    setVerifyingCode(true);
-    try {
-      await profileService.verificarCodigo(user!.idUsuario!, verificationCode);
-      toast.success("¡Verificación completada! Has recibido 100 puntos.");
-      setIsVerified(true);
-      setShowVerificationModal(false);
-      setVerificationCode("");
-      await loadProfileData(); // Recargar para ver los puntos actualizados
-    } catch (err: any) {
-      toast.error(err?.response?.data?.error || "Código inválido o expirado");
-    } finally {
-      setVerifyingCode(false);
-    }
-  };
 
   const handleUpdateTransactionStatus = async (idTransaccion: number, nuevoEstado: string) => {
     setUpdatingTx(idTransaccion);
@@ -355,81 +309,6 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
-      {/* Verification Banner */}
-      {!isVerified && (
-        <div className="bg-gradient-to-r from-blue-600 to-primary py-3 px-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 rounded-full p-1.5">
-                <User className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-white font-semibold text-sm">Verifica tu cuenta</p>
-                <p className="text-white/80 text-xs">Obtén la insignia de usuario verificado +100 puntos</p>
-              </div>
-            </div>
-            <Button
-              onClick={() => setShowVerificationModal(true)}
-              className="bg-white text-primary hover:bg-white/90 text-sm px-4 py-2"
-              disabled={sendingCode}
-            >
-              {sendingCode ? "Enviando..." : "Verificar ahora"}
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Verification Modal */}
-      {showVerificationModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-2">Verificación de cuenta</h2>
-            <p className="text-gray-600 mb-4 text-sm">
-              Te enviaremos un código de 6 dígitos a tu email ({profile?.email || user?.email})
-            </p>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Código de verificación
-                </label>
-                <input
-                  type="text"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="123456"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-center text-2xl tracking-widest"
-                />
-                <p className="text-xs text-gray-500 mt-1">El código expira en 30 minutos</p>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowVerificationModal(false)}
-                  className="flex-1"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleSendVerificationCode}
-                  variant="outline"
-                  className="flex-1"
-                  disabled={sendingCode}
-                >
-                  {sendingCode ? "..." : "Reenviar"}
-                </Button>
-              </div>
-              <Button
-                onClick={handleVerifyCode}
-                className="w-full bg-primary"
-                disabled={verifyingCode || verificationCode.length !== 6}
-              >
-                {verifyingCode ? "Verificando..." : "Verificar"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Edit Profile Modal */}
       {editingProfile && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
