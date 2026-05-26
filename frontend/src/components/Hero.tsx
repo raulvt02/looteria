@@ -61,7 +61,7 @@ export function Hero({ onNavigate }: HeroProps) {
           <h3 className="text-center text-lg font-semibold text-gray-900 mb-6">
             Categorías destacadas
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {categories.map((category) => (
               <button
                 key={category.name}
