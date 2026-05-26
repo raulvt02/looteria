@@ -55,6 +55,22 @@ export interface TransactionDTO {
   fechaTransaccion: string;
 }
 
+export interface ExchangeDTO {
+  idIntercambio: number;
+  publicacionId: number;
+  publicacionTitulo: string;
+  publicacionImagen?: string;
+  solicitanteId: number;
+  solicitanteNombre: string;
+  solicitadoId: number;
+  solicitadoNombre: string;
+  mensaje: string;
+  estado: string;
+  completadoPorSolicitante: boolean;
+  completadoPorSolicitado: boolean;
+  fechaCreacion: string;
+}
+
 export const adminService = {
   // USUARIOS
   getAllUsers: async () => {
@@ -94,6 +110,19 @@ export const adminService = {
   // TRANSACCIONES
   getAllTransactions: async () => {
     return await axiosInstance.get<TransactionDTO[]>('/transacciones/all');
+  },
+
+  updateTransactionStatus: async (id: number, estado: string) => {
+    return await axiosInstance.put<TransactionDTO>(`/transacciones/${id}/estado`, { estado });
+  },
+
+  // INTERCAMBIOS
+  getAllExchanges: async () => {
+    return await axiosInstance.get<ExchangeDTO[]>('/intercambios/all');
+  },
+
+  updateExchangeStatus: async (id: number, estado: string) => {
+    return await axiosInstance.put<ExchangeDTO>(`/intercambios/${id}/estado`, { estado });
   }
 };
 

@@ -90,6 +90,19 @@ public class ExchangeController {
         }
     }
 
+    // ─── Obtener todos los intercambios (admin) ───────────────────────────────────
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllExchanges() {
+        try {
+            List<ExchangeDTO> exchanges = exchangeService.getAllExchanges();
+            return ResponseEntity.ok(exchanges);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
     // ─── Actualizar estado de intercambio (aceptar/rechazar/cancelar) ────────────
 
     @PutMapping("/{id}/estado")

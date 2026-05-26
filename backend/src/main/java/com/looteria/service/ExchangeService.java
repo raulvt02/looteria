@@ -84,6 +84,13 @@ public class ExchangeService {
         ).map(this::mapToDTO).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<ExchangeDTO> getAllExchanges() {
+        return StreamSupport.stream(
+                exchangeRepository.findAll().spliterator(), false
+        ).map(this::mapToDTO).toList();
+    }
+
     @Transactional
     public ExchangeDTO updateExchangeStatus(Long exchangeId, String newStatus) {
         Exchange exchange = exchangeRepository.findById(exchangeId)

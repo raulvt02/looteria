@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
-import { adminService, UserDTO, ListingDetailDTO, DashboardStatsDTO, TransactionDTO } from '../api/services/adminService';
+import { adminService, UserDTO, ListingDetailDTO, DashboardStatsDTO, TransactionDTO, ExchangeDTO } from '../api/services/adminService';
 import { homePageService } from '../api/services/homePageService';
 import { Trash2, RefreshCw, AlertCircle, Check, Users, ShoppingBag, TrendingUp, ShieldCheck, Star } from 'lucide-react';
 
-type Tab = 'dashboard' | 'usuarios' | 'publicaciones' | 'transacciones';
+type Tab = 'dashboard' | 'usuarios' | 'publicaciones' | 'transacciones' | 'intercambios';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [listings, setListings] = useState<ListingDetailDTO[]>([]);
   const [transactions, setTransactions] = useState<TransactionDTO[]>([]);
+  const [exchanges, setExchanges] = useState<ExchangeDTO[]>([]);
   const [stats, setStats] = useState<DashboardStatsDTO | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,15 +25,17 @@ export default function AdminPanel() {
     setLoading(true);
     setError('');
     try {
-      const [usersRes, listingsRes, transactionsRes, statsRes] = await Promise.all([
+      const [usersRes, listingsRes, transactionsRes, exchangesRes, statsRes] = await Promise.all([
         adminService.getAllUsers(),
         adminService.getAllListings(),
         adminService.getAllTransactions(),
+        adminService.getAllExchanges(),
         adminService.getDashboardStats()
       ]);
       setUsers(usersRes.data);
       setListings(listingsRes.data);
       setTransactions(transactionsRes.data);
+      setExchanges(exchangesRes.data);
       setStats(statsRes.data);
     } catch (err) {
       setError('Error al cargar datos');
@@ -76,6 +79,30 @@ export default function AdminPanel() {
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       setError('Error al actualizar destacado');
+      console.error(err);
+    }
+  };
+
+  const handleUpdateTransactionStatus = async (id: number, newStatus: string) => {
+    try {
+      await adminService.updateTransactionStatus(id, newStatus);
+      setTransactions(transactions.map(t => t.idTransaccion === id ? { ...t, estado: newStatus } : t));
+      setSuccessMessage('Estado de transacción actualizado');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      setError('Error al actualizar estado de transacción');
+      console.error(err);
+    }
+  };
+
+  const handleUpdateExchangeStatus = async (id: number, newStatus: string) => {
+    try {
+      await adminService.updateExchangeStatus(id, newStatus);
+      setExchanges(exchanges.map(e => e.idIntercambio === id ? { ...e, estado: newStatus } : e));
+      setSuccessMessage('Estado de intercambio actualizado');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      setError('Error al actualizar estado de intercambio');
       console.error(err);
     }
   };
@@ -152,6 +179,16 @@ export default function AdminPanel() {
             }`}
           >
             Transacciones ({transactions.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('intercambios')}
+            className={`px-4 py-3 font-medium border-b-2 transition ${
+              activeTab === 'intercambios'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Intercambios ({exchanges.length})
           </button>
         </div>
 
@@ -377,12 +414,13 @@ export default function AdminPanel() {
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Precio</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Estado</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acción</th>
                 </tr>
               </thead>
               <tbody>
                 {transactions.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
                       No hay transacciones
                     </td>
                   </tr>
@@ -412,6 +450,79 @@ export default function AdminPanel() {
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">
                         {new Date(transaction.fechaTransaccion).toLocaleDateString('es-ES')}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <select
+                          value={transaction.estado}
+                          onChange={(e) => handleUpdateTransactionStatus(transaction.idTransaccion, e.target.value)}
+                          className="px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="PENDIENTE">PENDIENTE</option>
+                          <option value="EN_TRANSITO">EN_TRANSITO</option>
+                          <option value="COMPLETADA">COMPLETADA</option>
+                          <option value="CANCELADA">CANCELADA</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : activeTab === 'intercambios' ? (
+          // INTERCAMBIOS TABLE
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-100 border-b">
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">ID</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Producto</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Solicitante</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Solicitado</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Estado</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {exchanges.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                      No hay intercambios
+                    </td>
+                  </tr>
+                ) : (
+                  exchanges.map((exchange) => (
+                    <tr key={exchange.idIntercambio} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm text-gray-900">{exchange.idIntercambio}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">{exchange.publicacionTitulo}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{exchange.solicitanteNombre}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{exchange.solicitadoNombre}</td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          exchange.estado === 'COMPLETADA' ? 'bg-green-100 text-green-800' :
+                          exchange.estado === 'ACEPTADA' ? 'bg-blue-100 text-blue-800' :
+                          exchange.estado === 'RECHAZADA' ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {exchange.estado}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {new Date(exchange.fechaCreacion).toLocaleDateString('es-ES')}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <select
+                          value={exchange.estado}
+                          onChange={(e) => handleUpdateExchangeStatus(exchange.idIntercambio, e.target.value)}
+                          className="px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="PENDIENTE">PENDIENTE</option>
+                          <option value="ACEPTADA">ACEPTADA</option>
+                          <option value="RECHAZADA">RECHAZADA</option>
+                          <option value="CANCELADA">CANCELADA</option>
+                          <option value="COMPLETADA">COMPLETADA</option>
+                        </select>
                       </td>
                     </tr>
                   ))
