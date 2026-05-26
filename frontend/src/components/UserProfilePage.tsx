@@ -171,8 +171,8 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
   const handleUpdateProfile = async () => {
     try {
       await profileService.updateProfile(user!.idUsuario!, profileData);
-      setProfile({ ...profile, ...profileData });
       setEditingProfile(false);
+      await loadProfileData();
       toast.success("Perfil actualizado correctamente");
     } catch (error) {
       toast.error("Error al actualizar el perfil");

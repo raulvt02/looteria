@@ -1,4 +1,4 @@
-import { MapPin, Star, Tag, Repeat } from "lucide-react";
+import { MapPin, Tag, Repeat } from "lucide-react";
 import { Badge } from "./ui/badge";
 
 export interface Game {
@@ -66,14 +66,6 @@ export function GameCard({ game, onClick }: GameCardProps) {
                 Intercambio
               </Badge>
             ) : null}
-          </div>
-        )}
-        {game.rating && (
-          <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full">
-            <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-            <span className="text-white text-xs font-medium">
-              {game.rating.toFixed(1)}
-            </span>
           </div>
         )}
       </div>
