@@ -1,9 +1,19 @@
 import { useState, useEffect } from 'react';
-import { adminService, UserDTO, ListingDetailDTO, DashboardStatsDTO, TransactionDTO, ExchangeDTO } from '../api/services/adminService';
+import { adminService, UserDTO, ListingDetailDTO, DashboardStatsDTO, TransactionDTO, ExchangeDTO, AdminUserUpdateRequest } from '../api/services/adminService';
 import { homePageService } from '../api/services/homePageService';
-import { Trash2, RefreshCw, AlertCircle, Check, Users, ShoppingBag, TrendingUp, ShieldCheck, Star } from 'lucide-react';
+import { Trash2, RefreshCw, AlertCircle, Check, Users, ShoppingBag, TrendingUp, ShieldCheck, Star, Pencil } from 'lucide-react';
 
 type Tab = 'dashboard' | 'usuarios' | 'publicaciones' | 'transacciones' | 'intercambios';
+type DeleteTarget = { type: 'user' | 'listing' | 'transaction' | 'exchange'; id: number };
+
+const emptyUserForm = {
+  email: '',
+  nombreUsuario: '',
+  rol: 'REGISTRADO',
+  ubicacion: '',
+  reputacionMedia: '0',
+  verificadoIdentidad: false,
+};
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -14,8 +24,11 @@ export default function AdminPanel() {
   const [stats, setStats] = useState<DashboardStatsDTO | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'user' | 'listing'; id: number } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<DeleteTarget | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [editingUser, setEditingUser] = useState<UserDTO | null>(null);
+  const [userForm, setUserForm] = useState(emptyUserForm);
+  const [savingUser, setSavingUser] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -68,6 +81,78 @@ export default function AdminPanel() {
     } catch (err) {
       setError('Error al eliminar publicación');
       console.error(err);
+    }
+  };
+
+  const handleDeleteTransaction = async (id: number) => {
+    try {
+      await adminService.deleteTransaction(id);
+      setTransactions(transactions.filter(t => t.idTransaccion !== id));
+      setSuccessMessage('Transacción eliminada correctamente');
+      setTimeout(() => setSuccessMessage(''), 3000);
+      setDeleteConfirm(null);
+    } catch (err) {
+      setError('Error al eliminar transacción');
+      console.error(err);
+    }
+  };
+
+  const handleDeleteExchange = async (id: number) => {
+    try {
+      await adminService.deleteExchange(id);
+      setExchanges(exchanges.filter(e => e.idIntercambio !== id));
+      setSuccessMessage('Intercambio eliminado correctamente');
+      setTimeout(() => setSuccessMessage(''), 3000);
+      setDeleteConfirm(null);
+    } catch (err) {
+      setError('Error al eliminar intercambio');
+      console.error(err);
+    }
+  };
+
+  const openEditUser = (user: UserDTO) => {
+    setEditingUser(user);
+    setUserForm({
+      email: user.email ?? '',
+      nombreUsuario: user.nombreUsuario ?? '',
+      rol: user.rol ?? 'REGISTRADO',
+      ubicacion: user.ubicacion ?? '',
+      reputacionMedia: (user.reputacionMedia ?? 0).toString(),
+      verificadoIdentidad: Boolean(user.verificadoIdentidad),
+    });
+  };
+
+  const closeEditUser = () => {
+    setEditingUser(null);
+    setUserForm(emptyUserForm);
+  };
+
+  const handleSaveUser = async () => {
+    if (!editingUser) return;
+
+    setSavingUser(true);
+    setError('');
+    try {
+      const payload: AdminUserUpdateRequest = {
+        email: userForm.email,
+        nombreUsuario: userForm.nombreUsuario,
+        rol: userForm.rol,
+        ubicacion: userForm.ubicacion,
+        reputacionMedia: Number(userForm.reputacionMedia),
+        verificadoIdentidad: userForm.verificadoIdentidad,
+      };
+
+      const response = await adminService.updateUser(editingUser.idUsuario, payload);
+      const updatedUser = response.data;
+      setUsers(users.map(user => user.idUsuario === updatedUser.idUsuario ? updatedUser : user));
+      setSuccessMessage('Usuario actualizado correctamente');
+      setTimeout(() => setSuccessMessage(''), 3000);
+      closeEditUser();
+    } catch (err) {
+      setError('Error al actualizar usuario');
+      console.error(err);
+    } finally {
+      setSavingUser(false);
     }
   };
 
@@ -204,8 +289,12 @@ export default function AdminPanel() {
                   onClick={() => {
                     if (deleteConfirm.type === 'user') {
                       handleDeleteUser(deleteConfirm.id);
-                    } else {
+                    } else if (deleteConfirm.type === 'listing') {
                       handleDeleteListing(deleteConfirm.id);
+                    } else if (deleteConfirm.type === 'transaction') {
+                      handleDeleteTransaction(deleteConfirm.id);
+                    } else {
+                      handleDeleteExchange(deleteConfirm.id);
                     }
                   }}
                   className="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
@@ -217,6 +306,104 @@ export default function AdminPanel() {
                   className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
                 >
                   Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {editingUser && (
+          <div className="fixed inset-0 flex items-center justify-center p-4 z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+            <div className="bg-white rounded-lg border border-gray-200 shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold">Editar usuario</h3>
+                <button onClick={closeEditUser} className="text-gray-500 hover:text-gray-700 text-sm">
+                  Cerrar
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label className="block">
+                  <span className="block text-sm font-medium text-gray-700 mb-1">Email</span>
+                  <input
+                    type="email"
+                    value={userForm.email}
+                    onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="block text-sm font-medium text-gray-700 mb-1">Usuario</span>
+                  <input
+                    type="text"
+                    value={userForm.nombreUsuario}
+                    onChange={(e) => setUserForm({ ...userForm, nombreUsuario: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="block text-sm font-medium text-gray-700 mb-1">Rol</span>
+                  <select
+                    value={userForm.rol}
+                    onChange={(e) => setUserForm({ ...userForm, rol: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="REGISTRADO">REGISTRADO</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="INVITADO">INVITADO</option>
+                  </select>
+                </label>
+
+                <label className="block">
+                  <span className="block text-sm font-medium text-gray-700 mb-1">Ubicación</span>
+                  <input
+                    type="text"
+                    value={userForm.ubicacion}
+                    onChange={(e) => setUserForm({ ...userForm, ubicacion: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="block text-sm font-medium text-gray-700 mb-1">Reputación</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="5"
+                    step="0.1"
+                    value={userForm.reputacionMedia}
+                    onChange={(e) => setUserForm({ ...userForm, reputacionMedia: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </label>
+
+                <label className="flex items-center gap-3 mt-6">
+                  <input
+                    type="checkbox"
+                    checked={userForm.verificadoIdentidad}
+                    onChange={(e) => setUserForm({ ...userForm, verificadoIdentidad: e.target.checked })}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Verificado</span>
+                </label>
+              </div>
+
+              <div className="flex gap-3 justify-end mt-6">
+                <button
+                  onClick={closeEditUser}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                  disabled={savingUser}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSaveUser}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-70"
+                  disabled={savingUser}
+                >
+                  {savingUser ? 'Guardando...' : 'Guardar cambios'}
                 </button>
               </div>
             </div>
@@ -316,12 +503,22 @@ export default function AdminPanel() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm">
-                        <button
-                          onClick={() => setDeleteConfirm({ type: 'user', id: user.idUsuario! })}
-                          className="p-2 text-red-600 hover:bg-red-100 rounded transition"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openEditUser(user)}
+                            className="p-2 text-blue-600 hover:bg-blue-100 rounded transition"
+                            title="Editar usuario"
+                          >
+                            <Pencil size={18} />
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirm({ type: 'user', id: user.idUsuario! })}
+                            className="p-2 text-red-600 hover:bg-red-100 rounded transition"
+                            title="Eliminar usuario"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -452,16 +649,25 @@ export default function AdminPanel() {
                         {new Date(transaction.fechaTransaccion).toLocaleDateString('es-ES')}
                       </td>
                       <td className="px-4 py-3 text-sm">
-                        <select
-                          value={transaction.estado}
-                          onChange={(e) => handleUpdateTransactionStatus(transaction.idTransaccion, e.target.value)}
-                          className="px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="PENDIENTE">PENDIENTE</option>
-                          <option value="EN_TRANSITO">EN_TRANSITO</option>
-                          <option value="COMPLETADA">COMPLETADA</option>
-                          <option value="CANCELADA">CANCELADA</option>
-                        </select>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={transaction.estado}
+                            onChange={(e) => handleUpdateTransactionStatus(transaction.idTransaccion, e.target.value)}
+                            className="px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="PENDIENTE">PENDIENTE</option>
+                            <option value="EN_TRANSITO">EN_TRANSITO</option>
+                            <option value="COMPLETADA">COMPLETADA</option>
+                            <option value="CANCELADA">CANCELADA</option>
+                          </select>
+                          <button
+                            onClick={() => setDeleteConfirm({ type: 'transaction', id: transaction.idTransaccion })}
+                            className="p-2 text-red-600 hover:bg-red-100 rounded transition"
+                            title="Eliminar transacción"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -512,17 +718,26 @@ export default function AdminPanel() {
                         {new Date(exchange.fechaCreacion).toLocaleDateString('es-ES')}
                       </td>
                       <td className="px-4 py-3 text-sm">
-                        <select
-                          value={exchange.estado}
-                          onChange={(e) => handleUpdateExchangeStatus(exchange.idIntercambio, e.target.value)}
-                          className="px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="PENDIENTE">PENDIENTE</option>
-                          <option value="ACEPTADA">ACEPTADA</option>
-                          <option value="RECHAZADA">RECHAZADA</option>
-                          <option value="CANCELADA">CANCELADA</option>
-                          <option value="COMPLETADA">COMPLETADA</option>
-                        </select>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={exchange.estado}
+                            onChange={(e) => handleUpdateExchangeStatus(exchange.idIntercambio, e.target.value)}
+                            className="px-2 py-1 rounded border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="PENDIENTE">PENDIENTE</option>
+                            <option value="ACEPTADA">ACEPTADA</option>
+                            <option value="RECHAZADA">RECHAZADA</option>
+                            <option value="CANCELADA">CANCELADA</option>
+                            <option value="COMPLETADA">COMPLETADA</option>
+                          </select>
+                          <button
+                            onClick={() => setDeleteConfirm({ type: 'exchange', id: exchange.idIntercambio })}
+                            className="p-2 text-red-600 hover:bg-red-100 rounded transition"
+                            title="Eliminar intercambio"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

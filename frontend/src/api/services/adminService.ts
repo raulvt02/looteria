@@ -12,6 +12,15 @@ export interface UserDTO {
   reputacionMedia: number;
 }
 
+export interface AdminUserUpdateRequest {
+  email: string;
+  nombreUsuario: string;
+  rol: string;
+  ubicacion: string;
+  reputacionMedia: number;
+  verificadoIdentidad: boolean;
+}
+
 export interface ListingDetailDTO {
   idPublicacion: number;
   idUsuario: number;
@@ -85,6 +94,10 @@ export const adminService = {
     return await axiosInstance.delete(`/admin/usuarios/${id}`);
   },
 
+  updateUser: async (id: number, payload: AdminUserUpdateRequest) => {
+    return await axiosInstance.put<UserDTO>(`/admin/usuarios/${id}`, payload);
+  },
+
   // PUBLICACIONES
   getAllListings: async () => {
     return await axiosInstance.get<ListingDetailDTO[]>('/admin/publicaciones');
@@ -116,6 +129,10 @@ export const adminService = {
     return await axiosInstance.put<TransactionDTO>(`/transacciones/${id}/estado`, { estado });
   },
 
+  deleteTransaction: async (id: number) => {
+    return await axiosInstance.delete(`/admin/transacciones/${id}`);
+  },
+
   // INTERCAMBIOS
   getAllExchanges: async () => {
     return await axiosInstance.get<ExchangeDTO[]>('/intercambios/all');
@@ -123,6 +140,10 @@ export const adminService = {
 
   updateExchangeStatus: async (id: number, estado: string) => {
     return await axiosInstance.put<ExchangeDTO>(`/intercambios/${id}/estado`, { estado });
+  },
+
+  deleteExchange: async (id: number) => {
+    return await axiosInstance.delete(`/admin/intercambios/${id}`);
   }
 };
 

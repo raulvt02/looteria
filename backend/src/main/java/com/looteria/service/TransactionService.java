@@ -2,10 +2,14 @@ package com.looteria.service;
 
 import com.looteria.dto.TransactionDTO;
 import com.looteria.entity.ListingPost;
+import com.looteria.entity.Review;
 import com.looteria.entity.Transaction;
+import com.looteria.entity.Verification;
 import com.looteria.entity.User;
 import com.looteria.repository.ListingPostRepository;
+import com.looteria.repository.ReviewRepository;
 import com.looteria.repository.TransactionRepository;
+import com.looteria.repository.VerificationRepository;
 import com.looteria.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,12 @@ public class TransactionService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
+    private VerificationRepository verificationRepository;
 
     @Transactional
     public TransactionDTO createTransaction(Long publicacionId, Long compradorId, Long vendedorId,
@@ -86,6 +96,20 @@ public class TransactionService {
         return StreamSupport.stream(
                 transactionRepository.findAll().spliterator(), false
         ).map(this::mapToDTO).toList();
+    }
+
+    @Transactional
+    public void deleteTransaction(Long transactionId) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Transacción no encontrada"));
+
+        Iterable<Verification> verifications = verificationRepository.findByTransaccion_IdTransaccion(transactionId);
+        verificationRepository.deleteAll(verifications);
+
+        Iterable<Review> reviews = reviewRepository.findByTransaccion_IdTransaccion(transactionId);
+        reviewRepository.deleteAll(reviews);
+
+        transactionRepository.delete(transaction);
     }
 
     @Transactional

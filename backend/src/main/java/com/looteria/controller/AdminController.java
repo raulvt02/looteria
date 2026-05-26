@@ -1,13 +1,19 @@
 package com.looteria.controller;
 
 import com.looteria.dto.UserDTO;
+import com.looteria.dto.AdminUserUpdateDTO;
 import com.looteria.dto.ListingDetailDTO;
 import com.looteria.service.UserService;
 import com.looteria.service.ListingAdminService;
+import com.looteria.service.TransactionService;
+import com.looteria.service.ExchangeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
@@ -18,6 +24,12 @@ public class AdminController {
 
     @Autowired
     private ListingAdminService listingAdminService;
+
+    @Autowired
+    private TransactionService transactionService;
+
+    @Autowired
+    private ExchangeService exchangeService;
 
     // ENDPOINTS USUARIOS
 
@@ -52,6 +64,30 @@ public class AdminController {
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Actualizar usuario desde el panel admin
+     */
+    @PutMapping("/usuarios/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody AdminUserUpdateDTO request) {
+        try {
+            UserDTO updatedUser = userService.updateUserAdmin(
+                    id,
+                    request.getEmail(),
+                    request.getNombreUsuario(),
+                    request.getRol(),
+                    request.getUbicacion(),
+                    request.getReputacionMedia(),
+                    request.getVerificadoIdentidad()
+            );
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("status", "ERROR");
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
 
@@ -94,6 +130,32 @@ public class AdminController {
     public ResponseEntity<Void> deleteListing(@PathVariable Long id) {
         try {
             listingAdminService.deleteListing(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * DELETE /admin/transacciones/{id} - Eliminar transacción
+     */
+    @DeleteMapping("/transacciones/{id}")
+    public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
+        try {
+            transactionService.deleteTransaction(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * DELETE /admin/intercambios/{id} - Eliminar intercambio
+     */
+    @DeleteMapping("/intercambios/{id}")
+    public ResponseEntity<Void> deleteExchange(@PathVariable Long id) {
+        try {
+            exchangeService.deleteExchange(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.notFound().build();

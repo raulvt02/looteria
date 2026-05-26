@@ -6,6 +6,7 @@ import com.looteria.entity.UserRole;
 import com.looteria.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -83,6 +84,41 @@ public class UserService {
      */
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
+    }
+
+    public UserDTO updateUserAdmin(Long id, String email, String nombreUsuario, String rol, String ubicacion,
+                                   BigDecimal reputacionMedia, Boolean verificadoIdentidad) {
+        User usuario = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        String normalizedEmail = email != null ? email.trim() : null;
+        String normalizedNombreUsuario = nombreUsuario != null ? nombreUsuario.trim() : null;
+
+        if (normalizedEmail == null || normalizedEmail.isEmpty()) {
+            throw new RuntimeException("El email es obligatorio");
+        }
+        if (normalizedNombreUsuario == null || normalizedNombreUsuario.isEmpty()) {
+            throw new RuntimeException("El nombre de usuario es obligatorio");
+        }
+        if (rol == null || rol.trim().isEmpty()) {
+            throw new RuntimeException("El rol es obligatorio");
+        }
+
+        if (!normalizedEmail.equals(usuario.getEmail()) && userRepository.existsByEmail(normalizedEmail)) {
+            throw new RuntimeException("El email ya está registrado");
+        }
+        if (!normalizedNombreUsuario.equals(usuario.getNombreUsuario()) && userRepository.existsByNombreUsuario(normalizedNombreUsuario)) {
+            throw new RuntimeException("El nombre de usuario ya está en uso");
+        }
+
+        usuario.setEmail(normalizedEmail);
+        usuario.setNombreUsuario(normalizedNombreUsuario);
+        usuario.setRol(UserRole.valueOf(rol.trim()));
+        usuario.setUbicacion(ubicacion != null ? ubicacion.trim() : null);
+        usuario.setReputacionMedia(reputacionMedia != null ? reputacionMedia : BigDecimal.ZERO);
+        usuario.setVerificadoIdentidad(Boolean.TRUE.equals(verificadoIdentidad));
+
+        return convertToDTO(userRepository.save(usuario));
     }
 
     /**

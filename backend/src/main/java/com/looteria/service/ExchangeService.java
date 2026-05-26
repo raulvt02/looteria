@@ -92,6 +92,14 @@ public class ExchangeService {
     }
 
     @Transactional
+    public void deleteExchange(Long exchangeId) {
+        Exchange exchange = exchangeRepository.findById(exchangeId)
+                .orElseThrow(() -> new RuntimeException("Intercambio no encontrado"));
+
+        exchangeRepository.delete(exchange);
+    }
+
+    @Transactional
     public ExchangeDTO updateExchangeStatus(Long exchangeId, String newStatus) {
         Exchange exchange = exchangeRepository.findById(exchangeId)
                 .orElseThrow(() -> new RuntimeException("Intercambio no encontrado"));
