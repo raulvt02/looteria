@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { User, Mail, MapPin, Star, Package, ShoppingBag, Truck, Trophy, Edit, Trash2, Upload, X, Clock, CheckCircle, XCircle, MessageCircle, Repeat } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, Mail, MapPin, Star, Package, ShoppingBag, Trophy, Edit, Trash2, Upload, X, Clock, CheckCircle, XCircle, MessageCircle, Repeat } from "lucide-react";
 import { toast } from "sonner";
 import { Footer } from "./Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -295,6 +295,8 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
   const handleSaveEditListing = async () => {
     if (!editingListing) return;
 
+    const isSale = editListingData.tipoTransaccion === "VENTA";
+
     try {
       setEditingLoading(true);
       for (const file of newImageFiles) {
@@ -310,7 +312,7 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
       const updated = await profileService.updateListing(editingListing.idPublicacion, {
         titulo: editListingData.titulo,
         descripcionEstado: editListingData.descripcionEstado,
-        precio: editListingData.precio,
+        precio: isSale ? editListingData.precio : undefined,
         tipoTransaccion: editListingData.tipoTransaccion,
         estadoArticulo: editListingData.estadoArticulo,
         idioma: editListingData.idioma,
@@ -343,22 +345,6 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
       setEditingLoading(false);
     }
   };
-
-
-
-  const getShipmentStatus = (status: string) => {
-    switch (status) {
-      case "delivered":
-        return <Badge className="bg-green-100 text-green-700 border-0">Entregado</Badge>;
-      case "in_transit":
-        return <Badge className="bg-blue-100 text-blue-700 border-0">En tránsito</Badge>;
-      case "preparing":
-        return <Badge className="bg-yellow-100 text-yellow-700 border-0">Preparando</Badge>;
-      default:
-        return <Badge className="bg-gray-100 text-gray-700 border-0">{status}</Badge>;
-    }
-  };
-
   if (loading) {
     return <div className="min-h-screen pt-20 flex items-center justify-center">Cargando perfil...</div>;
   }
@@ -514,36 +500,25 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
               {/* Tipo de transacción */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de transacción</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {["VENTA", "INTERCAMBIO"].map((tipo) => (
-                    <button
-                      key={tipo}
-                      type="button"
-                      onClick={() => setEditListingData({ ...editListingData, tipoTransaccion: tipo })}
-                      className={`p-3 border-2 rounded-lg text-sm font-semibold transition ${
-                        editListingData.tipoTransaccion === tipo
-                          ? "border-primary bg-primary/5 text-primary"
-                          : "border-gray-200 text-gray-700 hover:border-gray-300"
-                      }`}
-                    >
-                      {tipo === "VENTA" ? "Venta" : "Intercambio"}
-                    </button>
-                  ))}
+                <div className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 font-medium">
+                  {editListingData.tipoTransaccion === "VENTA" ? "Venta" : "Intercambio"}
                 </div>
               </div>
 
               {/* Precio */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Precio (€)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={editListingData.precio}
-                  onChange={(e) => setEditListingData({ ...editListingData, precio: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
+              {editListingData.tipoTransaccion === "VENTA" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Precio (€)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={editListingData.precio}
+                    onChange={(e) => setEditListingData({ ...editListingData, precio: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+              )}
 
               {/* Estado del artículo */}
               <div>
