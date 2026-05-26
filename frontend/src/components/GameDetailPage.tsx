@@ -281,7 +281,7 @@ export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameD
               
               <div className="flex items-center gap-3 mb-4">
                 <Badge className="bg-blue-100 text-blue-700 border-0">{gameData.condition}</Badge>
-                <Badge className="bg-purple-100 text-purple-700 border-0">{gameData.itemType}</Badge>
+                <Badge className="bg-blue-100 text-blue-700 border-0">{gameData.itemType}</Badge>
                 {gameData.transactionType === "both" && (
                   <Badge className="bg-green-100 text-green-700 border-0">
                     <Repeat className="w-3 h-3 mr-1" />
@@ -326,7 +326,7 @@ export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameD
                 ) : gameData.transactionType === "exchange" ? (
                   <Button
                     onClick={handleExchange}
-                    className="w-full bg-purple-500 hover:bg-purple-600 text-white py-6 text-lg"
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white py-6 text-lg"
                   >
                     <Repeat className="w-5 h-5 mr-2" />
                     Solicitar intercambio
@@ -569,7 +569,7 @@ export function GameDetailPage({ gameId, onNavigate, userRole = "guest" }: GameD
               </Button>
               <Button
                 onClick={confirmExchange}
-                className="flex-1 bg-purple-600 hover:bg-purple-700"
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
                 disabled={exchangeLoading || !exchangeMessage.trim()}
               >
                 {exchangeLoading ? "Enviando..." : "Enviar solicitud"}

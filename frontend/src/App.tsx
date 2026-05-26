@@ -5,14 +5,13 @@ import { LoginRegisterPage } from "./components/LoginRegisterPage";
 import { GameDetailPage } from "./components/GameDetailPage";
 import { ExplorePage } from "./components/ExplorePage";
 import { UserProfilePage } from "./components/UserProfilePage";
-import { ExchangesPage } from "./components/ExchangesPage";
 import { FAQPage } from "./components/FAQPage";
 import AdminPanel from "./components/AdminPanel";
 import { CreateListingPage } from "./components/CreateListingPage";
 import { Toaster } from "./components/ui/sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
-type Page = "home" | "login" | "game" | "explore" | "profile" | "exchanges" | "faq" | "admin" | "create-listing" | "listing-detail" | "cart" | "tracking";
+type Page = "home" | "login" | "game" | "explore" | "profile" | "faq" | "admin" | "create-listing" | "listing-detail" | "cart" | "tracking";
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>("home");
@@ -85,7 +84,6 @@ function AppContent() {
       {currentPage === "explore" && <ExplorePage onNavigate={handleNavigate} />}
       {currentPage === "admin" && <AdminPanel />}
       {currentPage === "profile" && <UserProfilePage onNavigate={handleNavigate} userRole={getNavbarRole() as "guest" | "registered" | "admin"} />}
-      {currentPage === "exchanges" && <ExchangesPage onNavigate={handleNavigate} />}
       {currentPage === "faq" && <FAQPage onNavigate={handleNavigate} />}
       {currentPage === "create-listing" && <CreateListingPage onNavigate={handleNavigate} />}
     </div>

@@ -63,7 +63,7 @@ export function GameCard({ game, onClick }: GameCardProps) {
         {game.type && (
           <div className="absolute top-3 left-3">
             {game.type === "exchange" || game.type === "both" ? (
-              <Badge className="bg-purple-100 text-purple-700 border-0">
+              <Badge className="bg-blue-100 text-blue-700 border-0">
                 <Repeat className="w-3 h-3 mr-1" />
                 Intercambio
               </Badge>
@@ -102,8 +102,8 @@ export function GameCard({ game, onClick }: GameCardProps) {
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
           {game.type === "exchange" ? (
             <div className="flex items-center gap-1">
-              <Repeat className="w-4 h-4 text-purple-600" />
-              <span className="text-lg font-bold text-purple-600">Intercambio</span>
+              <Repeat className="w-4 h-4 text-blue-600" />
+              <span className="text-lg font-bold text-blue-600">Intercambio</span>
             </div>
           ) : game.price !== undefined ? (
             <div className="flex items-center gap-1">

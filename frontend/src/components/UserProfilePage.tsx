@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { User, Mail, MapPin, Star, Package, ShoppingBag, Truck, Trophy, Edit, Trash2, Upload, X } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { User, Mail, MapPin, Star, Package, ShoppingBag, Truck, Trophy, Edit, Trash2, Upload, X, Clock, CheckCircle, XCircle, MessageCircle, Repeat } from "lucide-react";
 import { toast } from "sonner";
 import { Footer } from "./Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -46,6 +46,13 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
   const [verificationCode, setVerificationCode] = useState("");
   const [sendingCode, setSendingCode] = useState(false);
   const [verifyingCode, setVerifyingCode] = useState(false);
+  
+  // Exchange states
+  const [exchangeActiveTab, setExchangeActiveTab] = useState<"received" | "sent">("received");
+  const [exchangesReceived, setExchangesReceived] = useState<any[]>([]);
+  const [exchangesSent, setExchangesSent] = useState<any[]>([]);
+  const [exchangesLoading, setExchangesLoading] = useState(true);
+  const [exchangeActionLoading, setExchangeActionLoading] = useState<number | null>(null);
 
   useEffect(() => {
     if (user?.idUsuario) {
@@ -72,6 +79,11 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
         profileService.getExchangesBySolicitante(user!.idUsuario!),
         profileService.getExchangesBySolicitado(user!.idUsuario!),
       ]);
+
+      // Set exchanges for the exchanges tab
+      setExchangesReceived(asSolicitado);
+      setExchangesSent(asSolicitante);
+      setExchangesLoading(false);
 
       const completedExchanges = [
         ...asSolicitante.filter((e: any) => e.estado === "COMPLETADA").map((e: any) => ({
@@ -167,6 +179,38 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
       toast.error(err?.response?.data?.error || "Error al actualizar el estado");
     } finally {
       setUpdatingTx(null);
+    }
+  };
+
+  // Exchange handlers
+  const handleUpdateExchangeStatus = async (id: number, estado: string) => {
+    setExchangeActionLoading(id);
+    try {
+      await profileService.updateExchangeStatus(id, estado);
+      toast.success(`Intercambio ${estado === "ACEPTADA" ? "aceptado" : "rechazado"} correctamente`);
+      await loadProfileData();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Error al actualizar el estado");
+    } finally {
+      setExchangeActionLoading(null);
+    }
+  };
+
+  const handleMarcarCompletado = async (id: number) => {
+    if (!user?.idUsuario) return;
+    setExchangeActionLoading(id);
+    try {
+      const result = await profileService.marcarIntercambioCompletado(id, user.idUsuario);
+      if (result.estado === "COMPLETADA") {
+        toast.success("¡Intercambio completado! Ambos usuarios han recibido 50 puntos.");
+      } else {
+        toast.success("Has marcado tu parte como completada. Esperando confirmación del otro usuario.");
+      }
+      await loadProfileData();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Error al marcar como completado");
+    } finally {
+      setExchangeActionLoading(null);
     }
   };
 
@@ -732,9 +776,10 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="listings" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsList className="grid w-full grid-cols-5 mb-8">
             <TabsTrigger value="listings">Mis publicaciones</TabsTrigger>
             <TabsTrigger value="transactions">Transacciones</TabsTrigger>
+            <TabsTrigger value="exchanges">Intercambios</TabsTrigger>
             <TabsTrigger value="reviews">Reseñas</TabsTrigger>
             <TabsTrigger value="points">Puntos</TabsTrigger>
           </TabsList>
@@ -795,7 +840,7 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                         </div>
                         <div className="flex items-center gap-6 text-sm text-gray-600 mb-4">
                           {listing.tipoTransaccion === "INTERCAMBIO" ? (
-                            <span className="text-2xl font-bold text-purple-600">Intercambio</span>
+                            <span className="text-2xl font-bold text-blue-600">Intercambio</span>
                           ) : (
                             <span className="text-2xl font-bold text-primary">{listing.precio}€</span>
                           )}
@@ -861,7 +906,7 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                       <tr key={t.idTransaccion || t.idIntercambio} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           {t.tipo === "INTERCAMBIO" ? (
-                            <Badge className="bg-purple-100 text-purple-700 border-0">Intercambio</Badge>
+                            <Badge className="bg-blue-100 text-blue-700 border-0">Intercambio</Badge>
                           ) : (
                             <Badge className={t.rol === "vendedor" ? "bg-green-100 text-green-700 border-0" : "bg-blue-100 text-blue-700 border-0"}>
                               {t.rol === "vendedor" ? "Venta" : "Compra"}
@@ -874,7 +919,7 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                         </td>
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">
                           {t.tipo === "INTERCAMBIO" ? (
-                            <span className="text-purple-600">Intercambio</span>
+                            <span className="text-blue-600">Intercambio</span>
                           ) : (
                             t.precioFinal > 0 ? `${t.precioFinal}€` : "-"
                           )}
@@ -916,6 +961,194 @@ export function UserProfilePage({ onNavigate, userRole: _userRole = "registered"
                 </table>
               </div>
             </div>
+            )}
+          </TabsContent>
+
+          {/* Exchanges */}
+          <TabsContent value="exchanges" className="space-y-4">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Mis intercambios</h2>
+            
+            {/* Sub-tabs for received/sent */}
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={() => setExchangeActiveTab("received")}
+                className={`px-6 py-3 rounded-full transition-all ${
+                  exchangeActiveTab === "received"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                Recibidas {exchangesReceived.filter((e) => e.estado === "PENDIENTE").length > 0 && `(${exchangesReceived.filter((e) => e.estado === "PENDIENTE").length})`}
+              </button>
+              <button
+                onClick={() => setExchangeActiveTab("sent")}
+                className={`px-6 py-3 rounded-full transition-all ${
+                  exchangeActiveTab === "sent"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                Enviadas
+              </button>
+            </div>
+
+            {exchangesLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-gray-600">Cargando intercambios...</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {(exchangeActiveTab === "received" ? exchangesReceived : exchangesSent).map((exchange) => {
+                  const isReceived = exchangeActiveTab === "received";
+                  const otherUserName = isReceived ? exchange.solicitanteNombre : exchange.solicitadoNombre;
+                  const isLoading = exchangeActionLoading === exchange.idIntercambio;
+                  const yaMarcaste = isReceived
+                    ? exchange.completadoPorSolicitado
+                    : exchange.completadoPorSolicitante;
+
+                  const getStatusInfo = (estado: string) => {
+                    switch (estado) {
+                      case "PENDIENTE": return { icon: Clock, text: "Pendiente", color: "text-yellow-500", bg: "bg-yellow-50" };
+                      case "ACEPTADA": return { icon: CheckCircle, text: "Aceptada", color: "text-green-500", bg: "bg-green-50" };
+                      case "RECHAZADA": return { icon: XCircle, text: "Rechazada", color: "text-red-500", bg: "bg-red-50" };
+                      case "CANCELADA": return { icon: XCircle, text: "Cancelada", color: "text-gray-500", bg: "bg-gray-50" };
+                      case "COMPLETADA": return { icon: Package, text: "Completada", color: "text-blue-500", bg: "bg-blue-50" };
+                      default: return { icon: Clock, text: estado, color: "text-gray-500", bg: "bg-gray-50" };
+                    }
+                  };
+
+                  const statusInfo = getStatusInfo(exchange.estado);
+                  const StatusIcon = statusInfo.icon;
+
+                  return (
+                    <div key={exchange.idIntercambio} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span className="text-blue-600 font-bold">{otherUserName?.[0]?.toUpperCase() || "?"}</span>
+                          </div>
+                          <div>
+                            <p className="text-gray-900 font-bold">{otherUserName}</p>
+                            <p className="text-gray-500 text-sm">{new Date(exchange.fechaCreacion).toLocaleDateString("es-ES")}</p>
+                          </div>
+                        </div>
+                        <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${statusInfo.bg}`}>
+                          <StatusIcon className={`w-4 h-4 ${statusInfo.color}`} />
+                          <span className={`${statusInfo.color} text-sm font-semibold`}>{statusInfo.text}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-4 mb-4">
+                        <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                          <img
+                            src={exchange.publicacionImagen?.startsWith("/") ? `${import.meta.env.VITE_API_URL}${exchange.publicacionImagen}` : exchange.publicacionImagen || "https://images.unsplash.com/photo-1593024579758-6221e85efbe6?w=400&q=80"}
+                            alt={exchange.publicacionTitulo}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-gray-500 text-sm font-semibold mb-1">
+                            {isReceived ? "Quiere tu publicación" : "Publicación solicitada"}
+                          </p>
+                          <button
+                            onClick={() => onNavigate("game", exchange.publicacionId)}
+                            className="text-gray-900 font-bold hover:text-blue-600 transition-colors text-left"
+                          >
+                            {exchange.publicacionTitulo}
+                          </button>
+                          <div className="flex items-center gap-1 mt-2">
+                            <Repeat className="w-4 h-4 text-blue-600" />
+                            <span className="text-blue-600 text-sm font-medium">Intercambio</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {exchange.mensaje && (
+                        <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                          <div className="flex items-start gap-2">
+                            <MessageCircle className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+                            <p className="text-gray-700 text-sm">{exchange.mensaje}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {exchange.estado === "ACEPTADA" && (
+                        <div className="flex gap-4 mb-4 text-sm">
+                          <div className={`flex items-center gap-1 ${exchange.completadoPorSolicitante ? "text-green-600" : "text-gray-400"}`}>
+                            <CheckCircle className="w-4 h-4" />
+                            <span>{exchange.solicitanteNombre}</span>
+                          </div>
+                          <div className={`flex items-center gap-1 ${exchange.completadoPorSolicitado ? "text-green-600" : "text-gray-400"}`}>
+                            <CheckCircle className="w-4 h-4" />
+                            <span>{exchange.solicitadoNombre}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex gap-3">
+                        {exchange.estado === "PENDIENTE" && isReceived && (
+                          <>
+                            <Button
+                              onClick={() => handleUpdateExchangeStatus(exchange.idIntercambio, "ACEPTADA")}
+                              disabled={isLoading}
+                              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
+                            >
+                              {isLoading ? "..." : "Aceptar"}
+                            </Button>
+                            <Button
+                              onClick={() => handleUpdateExchangeStatus(exchange.idIntercambio, "RECHAZADA")}
+                              disabled={isLoading}
+                              variant="outline"
+                              className="flex-1"
+                            >
+                              Rechazar
+                            </Button>
+                          </>
+                        )}
+
+                        {exchange.estado === "PENDIENTE" && !isReceived && (
+                          <Button
+                            onClick={() => handleUpdateExchangeStatus(exchange.idIntercambio, "CANCELADA")}
+                            disabled={isLoading}
+                            variant="outline"
+                            className="flex-1"
+                          >
+                            Cancelar solicitud
+                          </Button>
+                        )}
+
+                        {exchange.estado === "ACEPTADA" && (
+                          yaMarcaste ? (
+                            <div className="flex-1 py-2 px-6 rounded-full bg-green-50 text-green-600 text-center font-semibold text-sm">
+                              ✓ Ya marcaste como completado — esperando al otro usuario
+                            </div>
+                          ) : (
+                            <Button
+                              onClick={() => handleMarcarCompletado(exchange.idIntercambio)}
+                              disabled={isLoading}
+                              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
+                            >
+                              {isLoading ? "..." : "Marcar como completado"}
+                            </Button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {(exchangeActiveTab === "received" ? exchangesReceived : exchangesSent).length === 0 && (
+                  <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+                    <Package className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-600">
+                      {exchangeActiveTab === "received"
+                        ? "Nadie ha solicitado intercambiar contigo todavía"
+                        : "Todavía no has enviado ninguna solicitud de intercambio"}
+                    </p>
+                  </div>
+                )}
+              </div>
             )}
           </TabsContent>
 
