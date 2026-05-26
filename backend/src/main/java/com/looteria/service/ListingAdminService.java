@@ -7,6 +7,10 @@ import com.looteria.entity.Image;
 import com.looteria.entity.ListingPost;
 import com.looteria.repository.ImageRepository;
 import com.looteria.repository.ListingPostRepository;
+import com.looteria.repository.TransactionRepository;
+import com.looteria.repository.ExchangeRepository;
+import com.looteria.repository.ReviewRepository;
+import com.looteria.repository.VerificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +29,18 @@ public class ListingAdminService {
 
     @Autowired
     private ImageRepository imageRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private ExchangeRepository exchangeRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
+    private VerificationRepository verificationRepository;
 
     @Autowired
     private Cloudinary cloudinary;
@@ -61,6 +77,22 @@ public class ListingAdminService {
     public void deleteListing(Long id) {
         ListingPost listing = listingPostRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Publicación no encontrada"));
+        
+        // Eliminar transacciones relacionadas
+        Iterable<com.looteria.entity.Transaction> transactions = transactionRepository.findByPublicacion_IdPublicacion(id);
+        transactionRepository.deleteAll(transactions);
+        
+        // Eliminar intercambios relacionados
+        Iterable<com.looteria.entity.Exchange> exchanges = exchangeRepository.findByPublicacion_IdPublicacion(id);
+        exchangeRepository.deleteAll(exchanges);
+        
+        // Eliminar reseñas relacionadas
+        List<com.looteria.entity.Review> reviews = reviewRepository.findByPublicacion_IdPublicacion(id);
+        reviewRepository.deleteAll(reviews);
+        
+        // Eliminar verificaciones relacionadas
+        Iterable<com.looteria.entity.Verification> verifications = verificationRepository.findByPublicacion_IdPublicacion(id);
+        verificationRepository.deleteAll(verifications);
         
         // Eliminar imágenes de Cloudinary
         List<Image> images = (List<Image>) imageRepository.findByPublicacion_IdPublicacion(id);

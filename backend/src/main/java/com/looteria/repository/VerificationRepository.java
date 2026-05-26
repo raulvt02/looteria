@@ -10,4 +10,6 @@ public interface VerificationRepository extends JpaRepository<Verification, Long
     Iterable<Verification> findByTransaccion_IdTransaccion(Long transaccionId);
     
     Iterable<Verification> findByEstado(Verification.VerificationStatus estado);
+    
+    Iterable<Verification> findByPublicacion_IdPublicacion(Long publicacionId);
 }
