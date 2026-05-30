@@ -43,7 +43,7 @@ export function Navbar({ onNavigate, currentPage }: NavbarProps) {
             </span>
           </button>
 
-          {/* Search Bar - Desktop */}
+          {/* Barra de navegación */}
           <form onSubmit={handleSearch} className="hidden lg:flex items-center flex-1 max-w-md">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -57,7 +57,6 @@ export function Navbar({ onNavigate, currentPage }: NavbarProps) {
             </div>
           </form>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1 flex-shrink-0">
             <button
               onClick={() => onNavigate("home")}

@@ -2,7 +2,6 @@ package com.looteria.controller;
 
 import com.looteria.dto.CreateTransactionRequestDTO;
 import com.looteria.dto.TransactionDTO;
-import com.looteria.entity.Transaction;
 import com.looteria.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

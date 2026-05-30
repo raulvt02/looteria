@@ -38,7 +38,7 @@ public class UserService {
     }
     
     public User loginUser(String email, String contrasena) {
-        Optional<User> usuarioOpt = userRepository.findByEmail(email);
+        Optional<User> usuarioOpt = userRepository.findByEmailAndActivoTrue(email);
         if (usuarioOpt.isEmpty()) {
             throw new RuntimeException("Usuario no encontrado");
         }
@@ -63,28 +63,31 @@ public class UserService {
     }
 
     /**
-     * Obtener todos los usuarios como DTOs
+     * Obtener todos los usuarios como DTOs (solo activos)
      */
     public List<UserDTO> getAllUsersDTO() {
-        return userRepository.findAll().stream()
+        return userRepository.findAllByActivoTrue().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Obtener usuario por ID como DTO
+     * Obtener usuario por ID como DTO (solo si está activo)
      */
     public UserDTO getUserByIdDTO(Long id) {
-        return userRepository.findById(id)
+        return userRepository.findByIdUsuarioAndActivoTrue(id)
                 .map(this::convertToDTO)
                 .orElse(null);
     }
 
     /**
-     * Eliminar usuario por ID
+     * Eliminar usuario por ID (soft delete)
      */
     public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        user.setActivo(false);
+        userRepository.save(user);
     }
 
     public UserDTO updateUserAdmin(Long id, String email, String nombreUsuario, String rol, String ubicacion,
@@ -112,7 +115,7 @@ public class UserService {
             throw new RuntimeException("El nombre de usuario ya está en uso");
         }
 
-        // Guardar estado anterior de verificadoIdentidad para ajustar puntos
+        // Guarda estado anterior de verificadoIdentidad
         Boolean verificadoAntes = usuario.getVerificadoIdentidad();
         Boolean verificadoAhora = Boolean.TRUE.equals(verificadoIdentidad);
 
@@ -123,12 +126,12 @@ public class UserService {
         usuario.setReputacionMedia(reputacionMedia != null ? reputacionMedia : BigDecimal.ZERO);
         usuario.setVerificadoIdentidad(verificadoAhora);
 
-        // Ajustar puntos si cambió el estado de verificación
+
         if (!verificadoAntes && verificadoAhora) {
-            // Se marcó como verificado: sumar 100 puntos
+            // Sumar puntos
             usuario.setPuntosAcumulados(usuario.getPuntosAcumulados() + 100);
         } else if (verificadoAntes && !verificadoAhora) {
-            // Se quitó la verificación: restar 100 puntos (pero no permitir negativos)
+            // Restar puntos
             usuario.setPuntosAcumulados(Math.max(0, usuario.getPuntosAcumulados() - 100));
         }
 

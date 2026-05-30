@@ -60,7 +60,7 @@ public class TransactionService {
         transaction.setEstado(Transaction.TransactionStatus.PENDIENTE);
         transaction.setFechaTransaccion(LocalDateTime.now());
 
-        // Calcular comisión (10% del precio final)
+       
         BigDecimal comision = precioFinal.multiply(new BigDecimal("0.10"));
         transaction.setComision(comision);
 

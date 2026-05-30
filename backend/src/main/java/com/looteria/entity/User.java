@@ -46,6 +46,9 @@ public class User {
     @Column(name = "reputacion_media", nullable = false, precision = 3, scale = 2)
     private BigDecimal reputacionMedia = BigDecimal.ZERO;
 
+    @Column(name = "activo", nullable = false)
+    private Boolean activo = true;
+
     @PrePersist
     protected void onCreate() {
         fechaRegistro = LocalDateTime.now();

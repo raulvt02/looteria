@@ -1,678 +1,378 @@
--- Simplified SQL script for Railway deployment
+-- MySQL dump 10.13  Distrib 8.0.19, for Win64 (x86_64)
+--
+-- Host: zephyr.proxy.rlwy.net    Database: railway
+-- ------------------------------------------------------
+-- Server version	9.4.0
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Base de datos: `looteria`
+-- Table structure for table `canjes_puntos`
 --
 
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `canjes_puntos`
---
-
+DROP TABLE IF EXISTS `canjes_puntos`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `canjes_puntos` (
-  `id_canje` bigint(20) NOT NULL,
+  `id_canje` bigint NOT NULL AUTO_INCREMENT,
   `codigo` varchar(20) NOT NULL,
   `fecha_canje` datetime(6) NOT NULL,
-  `puntos_usados` int(11) NOT NULL,
+  `puntos_usados` int NOT NULL,
   `tipo_canje` varchar(255) NOT NULL,
   `usado` bit(1) NOT NULL,
-  `id_usuario` bigint(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `carrito`
---
-
-CREATE TABLE `carrito` (
-  `id_carrito` bigint(20) NOT NULL,
-  `id_usuario` bigint(20) NOT NULL,
-  `id_publicacion` bigint(20) NOT NULL,
-  `cantidad` int(11) DEFAULT 1,
-  `fecha_agregado` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
+  `id_usuario` bigint NOT NULL,
+  PRIMARY KEY (`id_canje`),
+  UNIQUE KEY `UK_59puy198mhwaqn699gl32q49w` (`codigo`),
+  KEY `FKbx1arkfyomhgvw9b37so0sflb` (`id_usuario`),
+  CONSTRAINT `FKbx1arkfyomhgvw9b37so0sflb` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Estructura de tabla para la tabla `categorias`
+-- Dumping data for table `canjes_puntos`
 --
 
+LOCK TABLES `canjes_puntos` WRITE;
+/*!40000 ALTER TABLE `canjes_puntos` DISABLE KEYS */;
+INSERT INTO `canjes_puntos` VALUES (1,'DESC-FEB9B825','2026-05-26 17:29:11.562338',500,'DESCUENTO_5',_binary '\0',17),(2,'DESC-B520A23A','2026-05-26 20:47:54.694834',500,'DESCUENTO_5',_binary '\0',15),(3,'DESC-A2A129F0','2026-05-26 21:11:31.968488',500,'DESCUENTO_5',_binary '\0',17),(4,'DESC-C50CC656','2026-05-26 21:34:21.936353',500,'DESCUENTO_5',_binary '\0',16);
+/*!40000 ALTER TABLE `canjes_puntos` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `categorias`
+--
+
+DROP TABLE IF EXISTS `categorias`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `categorias` (
-  `id_categoria` bigint(20) NOT NULL,
-  `tipo` varchar(100) NOT NULL,
+  `id_categoria` bigint NOT NULL AUTO_INCREMENT,
+  `fecha_creacion` datetime(6) NOT NULL,
   `nombre` varchar(255) NOT NULL,
-  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `tipo` varchar(255) NOT NULL,
+  PRIMARY KEY (`id_categoria`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Volcado de datos para la tabla `categorias`
+-- Dumping data for table `categorias`
 --
 
-INSERT INTO `categorias` (`id_categoria`, `tipo`, `nombre`, `fecha_creacion`) VALUES
-(1, 'PLATAFORMA', 'PlayStation 5', '2026-02-24 12:17:11'),
-(2, 'PLATAFORMA', 'Xbox Series X', '2026-02-24 12:17:11'),
-(3, 'PLATAFORMA', 'Nintendo Switch', '2026-02-24 12:17:11'),
-(4, 'PLATAFORMA', 'PC', '2026-02-24 12:17:11'),
-(5, 'PLATAFORMA', 'PlayStation 4', '2026-02-24 12:17:11'),
-(6, 'PLATAFORMA', 'Xbox One', '2026-02-24 12:17:11'),
-(7, 'TIPO_ARTICULO', 'Videojuego', '2026-02-24 12:17:11'),
-(8, 'TIPO_ARTICULO', 'Accesorio', '2026-02-24 12:17:11'),
-(9, 'TIPO_ARTICULO', 'Consola', '2026-02-24 12:17:11'),
-(10, 'TIPO_ARTICULO', 'Merchandise', '2026-02-24 12:17:11'),
-(11, 'ESTADO_ARTICULO', 'Nuevo', '2026-02-24 12:17:11'),
-(12, 'ESTADO_ARTICULO', 'Como nuevo', '2026-02-24 12:17:11'),
-(13, 'ESTADO_ARTICULO', 'Buen estado', '2026-02-24 12:17:11'),
-(14, 'ESTADO_ARTICULO', 'En uso', '2026-02-24 12:17:11'),
-(15, 'ESTADO_ARTICULO', 'Defectuoso', '2026-02-24 12:17:11'),
-(16, 'IDIOMA', 'Español', '2026-02-24 12:17:11'),
-(17, 'IDIOMA', 'Inglés', '2026-02-24 12:17:11'),
-(18, 'IDIOMA', 'Francés', '2026-02-24 12:17:11'),
-(19, 'IDIOMA', 'Alemán', '2026-02-24 12:17:11'),
-(20, 'REGION', 'Europa', '2026-02-24 12:17:11'),
-(21, 'REGION', 'América del Norte', '2026-02-24 12:17:11'),
-(22, 'REGION', 'América del Sur', '2026-02-24 12:17:11'),
-(23, 'REGION', 'Asia', '2026-02-24 12:17:11'),
-(26, 'PLATAFORMA', 'Nintendo Switch', '2026-02-24 12:20:03'),
-(27, 'PLATAFORMA', 'PC', '2026-02-24 12:20:03'),
-(28, 'PLATAFORMA', 'PlayStation 4', '2026-02-24 12:20:03'),
-(29, 'PLATAFORMA', 'Xbox One', '2026-02-24 12:20:03'),
-(30, 'TIPO_ARTICULO', 'Videojuego', '2026-02-24 12:20:03'),
-(31, 'TIPO_ARTICULO', 'Accesorio', '2026-02-24 12:20:03'),
-(32, 'TIPO_ARTICULO', 'Consola', '2026-02-24 12:20:03'),
-(33, 'TIPO_ARTICULO', 'Merchandise', '2026-02-24 12:20:03'),
-(34, 'ESTADO_ARTICULO', 'Nuevo', '2026-02-24 12:20:03'),
-(35, 'ESTADO_ARTICULO', 'Como nuevo', '2026-02-24 12:20:03'),
-(36, 'ESTADO_ARTICULO', 'Buen estado', '2026-02-24 12:20:03'),
-(37, 'ESTADO_ARTICULO', 'En uso', '2026-02-24 12:20:03'),
-(38, 'ESTADO_ARTICULO', 'Defectuoso', '2026-02-24 12:20:03'),
-(39, 'IDIOMA', 'Español', '2026-02-24 12:20:03'),
-(40, 'IDIOMA', 'Inglés', '2026-02-24 12:20:03'),
-(41, 'IDIOMA', 'Francés', '2026-02-24 12:20:03'),
-(42, 'IDIOMA', 'Alemán', '2026-02-24 12:20:03'),
-(43, 'REGION', 'Europa', '2026-02-24 12:20:03'),
-(44, 'REGION', 'América del Norte', '2026-02-24 12:20:03'),
-(45, 'REGION', 'América del Sur', '2026-02-24 12:20:03'),
-(46, 'REGION', 'Asia', '2026-02-24 12:20:03'),
-(47, 'PLATAFORMA', 'PlayStation 5', '2026-02-24 12:20:03'),
-(48, 'PLATAFORMA', 'Xbox Series X', '2026-02-24 12:20:03'),
-(49, 'PLATAFORMA', 'Nintendo Switch', '2026-02-24 12:20:03'),
-(50, 'PLATAFORMA', 'PC', '2026-02-24 12:20:03'),
-(51, 'PLATAFORMA', 'PlayStation 4', '2026-02-24 12:20:03'),
-(52, 'PLATAFORMA', 'Xbox One', '2026-02-24 12:20:03'),
-(53, 'TIPO_ARTICULO', 'Videojuego', '2026-02-24 12:20:03'),
-(54, 'TIPO_ARTICULO', 'Accesorio', '2026-02-24 12:20:03'),
-(55, 'TIPO_ARTICULO', 'Consola', '2026-02-24 12:20:03'),
-(56, 'TIPO_ARTICULO', 'Merchandise', '2026-02-24 12:20:03'),
-(57, 'ESTADO_ARTICULO', 'Nuevo', '2026-02-24 12:20:03'),
-(58, 'ESTADO_ARTICULO', 'Como nuevo', '2026-02-24 12:20:03'),
-(59, 'ESTADO_ARTICULO', 'Buen estado', '2026-02-24 12:20:03'),
-(60, 'ESTADO_ARTICULO', 'En uso', '2026-02-24 12:20:03'),
-(61, 'ESTADO_ARTICULO', 'Defectuoso', '2026-02-24 12:20:03'),
-(62, 'IDIOMA', 'Español', '2026-02-24 12:20:03'),
-(63, 'IDIOMA', 'Inglés', '2026-02-24 12:20:03'),
-(64, 'IDIOMA', 'Francés', '2026-02-24 12:20:03'),
-(65, 'IDIOMA', 'Alemán', '2026-02-24 12:20:03'),
-(66, 'REGION', 'Europa', '2026-02-24 12:20:03'),
-(67, 'REGION', 'América del Norte', '2026-02-24 12:20:03'),
-(68, 'REGION', 'América del Sur', '2026-02-24 12:20:03'),
-(69, 'REGION', 'Asia', '2026-02-24 12:20:03'),
-(70, 'PLATAFORMA', 'PlayStation 5', '2026-02-24 12:20:11'),
-(71, 'PLATAFORMA', 'Xbox Series X', '2026-02-24 12:20:11'),
-(72, 'PLATAFORMA', 'Nintendo Switch', '2026-02-24 12:20:11'),
-(73, 'PLATAFORMA', 'PC', '2026-02-24 12:20:11'),
-(74, 'PLATAFORMA', 'PlayStation 4', '2026-02-24 12:20:11'),
-(75, 'PLATAFORMA', 'Xbox One', '2026-02-24 12:20:11'),
-(76, 'TIPO_ARTICULO', 'Videojuego', '2026-02-24 12:20:11'),
-(77, 'TIPO_ARTICULO', 'Accesorio', '2026-02-24 12:20:11'),
-(78, 'TIPO_ARTICULO', 'Consola', '2026-02-24 12:20:11'),
-(79, 'TIPO_ARTICULO', 'Merchandise', '2026-02-24 12:20:11'),
-(80, 'ESTADO_ARTICULO', 'Nuevo', '2026-02-24 12:20:11'),
-(81, 'ESTADO_ARTICULO', 'Como nuevo', '2026-02-24 12:20:11'),
-(82, 'ESTADO_ARTICULO', 'Buen estado', '2026-02-24 12:20:11'),
-(83, 'ESTADO_ARTICULO', 'En uso', '2026-02-24 12:20:11'),
-(84, 'ESTADO_ARTICULO', 'Defectuoso', '2026-02-24 12:20:11'),
-(85, 'IDIOMA', 'Español', '2026-02-24 12:20:11'),
-(86, 'IDIOMA', 'Inglés', '2026-02-24 12:20:11'),
-(87, 'IDIOMA', 'Francés', '2026-02-24 12:20:11'),
-(88, 'IDIOMA', 'Alemán', '2026-02-24 12:20:11'),
-(89, 'REGION', 'Europa', '2026-02-24 12:20:11'),
-(90, 'REGION', 'América del Norte', '2026-02-24 12:20:11'),
-(91, 'REGION', 'América del Sur', '2026-02-24 12:20:11'),
-(92, 'REGION', 'Asia', '2026-02-24 12:20:11');
-
--- --------------------------------------------------------
+LOCK TABLES `categorias` WRITE;
+/*!40000 ALTER TABLE `categorias` DISABLE KEYS */;
+INSERT INTO `categorias` VALUES (1,'2026-02-24 12:17:11.000000','PlayStation 5','PLATAFORMA'),(2,'2026-02-24 12:17:11.000000','Xbox Series X','PLATAFORMA'),(3,'2026-02-24 12:17:11.000000','Nintendo Switch','PLATAFORMA'),(4,'2026-02-24 12:17:11.000000','PC','PLATAFORMA'),(5,'2026-02-24 12:17:11.000000','PlayStation 4','PLATAFORMA'),(6,'2026-02-24 12:17:11.000000','Xbox One','PLATAFORMA'),(7,'2026-02-24 12:17:11.000000','Videojuego','TIPO_ARTICULO'),(8,'2026-02-24 12:17:11.000000','Accesorio','TIPO_ARTICULO'),(9,'2026-02-24 12:17:11.000000','Consola','TIPO_ARTICULO'),(10,'2026-02-24 12:17:11.000000','Merchandise','TIPO_ARTICULO'),(11,'2026-02-24 12:17:11.000000','Nuevo','ESTADO_ARTICULO'),(12,'2026-02-24 12:17:11.000000','Como nuevo','ESTADO_ARTICULO'),(13,'2026-02-24 12:17:11.000000','Buen estado','ESTADO_ARTICULO'),(14,'2026-02-24 12:17:11.000000','En uso','ESTADO_ARTICULO'),(15,'2026-02-24 12:17:11.000000','Defectuoso','ESTADO_ARTICULO'),(16,'2026-02-24 12:17:11.000000','Español','IDIOMA'),(17,'2026-02-24 12:17:11.000000','Inglés','IDIOMA'),(18,'2026-02-24 12:17:11.000000','Francés','IDIOMA'),(19,'2026-02-24 12:17:11.000000','Alemán','IDIOMA'),(20,'2026-02-24 12:17:11.000000','Europa','REGION'),(21,'2026-02-24 12:17:11.000000','América del Norte','REGION'),(22,'2026-02-24 12:17:11.000000','América del Sur','REGION'),(23,'2026-02-24 12:17:11.000000','Asia','REGION');
+/*!40000 ALTER TABLE `categorias` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
--- Estructura de tabla para la tabla `envios`
+-- Table structure for table `imagenes`
 --
 
-CREATE TABLE `envios` (
-  `id_envio` bigint(20) NOT NULL,
-  `id_transaccion` bigint(20) NOT NULL,
-  `proveedor` varchar(255) NOT NULL,
-  `numero_seguimiento` varchar(100) DEFAULT NULL,
-  `detalles_seguimiento` text DEFAULT NULL,
-  `coste` decimal(10,2) DEFAULT NULL,
-  `estado` enum('PREPARANDO','ENVIADO','EN_TRANSITO','ENTREGADO','DEVUELTO') DEFAULT 'PREPARANDO',
-  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `imagenes`
---
-
+DROP TABLE IF EXISTS `imagenes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `imagenes` (
-  `id_imagen` bigint(20) NOT NULL,
-  `id_publicacion` bigint(20) NOT NULL,
-  `ruta_imagen` varchar(500) NOT NULL,
-  `descripcion` text DEFAULT NULL,
-  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id_imagen` bigint NOT NULL AUTO_INCREMENT,
+  `descripcion` varchar(255) DEFAULT NULL,
+  `fecha_creacion` datetime(6) NOT NULL,
+  `ruta_imagen` varchar(255) NOT NULL,
+  `id_publicacion` bigint NOT NULL,
+  `public_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id_imagen`),
+  KEY `FKb7b5ka5ew9lyh5okldnmq6lwx` (`id_publicacion`),
+  CONSTRAINT `FKb7b5ka5ew9lyh5okldnmq6lwx` FOREIGN KEY (`id_publicacion`) REFERENCES `publicaciones` (`id_publicacion`)
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Volcado de datos para la tabla `imagenes`
+-- Dumping data for table `imagenes`
 --
 
-INSERT INTO `imagenes` (`id_imagen`, `id_publicacion`, `ruta_imagen`, `descripcion`, `fecha_creacion`) VALUES
-(26, 13, '/imagenes/serve/94fd4fbd-fe30-47ac-acf7-67d7cf8e353d.png', NULL, '2026-05-23 11:04:06'),
-(27, 14, '/imagenes/serve/ba18a4e6-aa31-409e-857c-a56c54768217.png', NULL, '2026-05-23 12:26:43');
-
--- --------------------------------------------------------
+LOCK TABLES `imagenes` WRITE;
+/*!40000 ALTER TABLE `imagenes` DISABLE KEYS */;
+INSERT INTO `imagenes` VALUES (32,NULL,'2026-05-26 17:23:14.231766','https://res.cloudinary.com/drq4f7l51/image/upload/v1779816193/dvksx2rghgdn69qfqgjo.webp',46,'dvksx2rghgdn69qfqgjo'),(33,NULL,'2026-05-26 17:25:36.997824','https://res.cloudinary.com/drq4f7l51/image/upload/v1779816336/nc0mtmidrnfacaqc2yav.webp',47,'nc0mtmidrnfacaqc2yav'),(34,NULL,'2026-05-26 17:32:55.172736','https://res.cloudinary.com/drq4f7l51/image/upload/v1779816774/kci9fk6axezxl79s2uyl.webp',48,'kci9fk6axezxl79s2uyl'),(35,NULL,'2026-05-26 17:33:46.157815','https://res.cloudinary.com/drq4f7l51/image/upload/v1779816825/wicz56jur2nswcgilf3d.webp',49,'wicz56jur2nswcgilf3d'),(36,NULL,'2026-05-26 17:38:39.642658','https://res.cloudinary.com/drq4f7l51/image/upload/v1779817119/tedwt8mpkwze0ftu1mo4.webp',51,'tedwt8mpkwze0ftu1mo4'),(41,NULL,'2026-05-26 21:35:02.776393','https://res.cloudinary.com/drq4f7l51/image/upload/v1779831302/m2j9k3mhhdk4s3wiuyrr.webp',56,'m2j9k3mhhdk4s3wiuyrr'),(42,NULL,'2026-05-26 21:35:04.074033','https://res.cloudinary.com/drq4f7l51/image/upload/v1779831303/onl94sfoqjmgmxjfjlyc.webp',56,'onl94sfoqjmgmxjfjlyc');
+/*!40000 ALTER TABLE `imagenes` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
--- Estructura de tabla para la tabla `intercambios`
+-- Table structure for table `intercambios`
 --
 
+DROP TABLE IF EXISTS `intercambios`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `intercambios` (
-  `id_intercambio` bigint(20) NOT NULL,
-  `id_publicacion` bigint(20) NOT NULL,
-  `id_solicitante` bigint(20) NOT NULL,
-  `id_solicitado` bigint(20) NOT NULL,
-  `mensaje` text DEFAULT NULL,
-  `estado` enum('PENDIENTE','ACEPTADA','RECHAZADA','CANCELADA') DEFAULT 'PENDIENTE',
-  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `productos`
---
-
-CREATE TABLE `productos` (
-  `id_producto` bigint(20) NOT NULL,
-  `titulo` varchar(255) NOT NULL,
-  `descripcion` text DEFAULT NULL,
-  `plataforma_id` bigint(20) DEFAULT NULL,
-  `tipo_articulo_id` bigint(20) DEFAULT NULL,
-  `fecha_lanzamiento` datetime DEFAULT NULL,
-  `valor_estimado` decimal(10,2) DEFAULT NULL,
-  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id_intercambio` bigint NOT NULL AUTO_INCREMENT,
+  `estado` enum('PENDIENTE','ACEPTADA','RECHAZADA','CANCELADA','COMPLETADA') DEFAULT 'PENDIENTE',
+  `fecha_creacion` datetime(6) NOT NULL,
+  `mensaje` text,
+  `id_publicacion` bigint NOT NULL,
+  `id_solicitado` bigint NOT NULL,
+  `id_solicitante` bigint NOT NULL,
+  `completado_por_solicitante` tinyint(1) DEFAULT '0',
+  `completado_por_solicitado` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id_intercambio`),
+  KEY `FK2pfbewiden5kgvesea7kftn1o` (`id_publicacion`),
+  KEY `FKn1klasr4eb2549wklwupoo0r8` (`id_solicitado`),
+  KEY `FKqkmpn7bb8t6nmpao0d965rtoh` (`id_solicitante`),
+  CONSTRAINT `FK2pfbewiden5kgvesea7kftn1o` FOREIGN KEY (`id_publicacion`) REFERENCES `publicaciones` (`id_publicacion`),
+  CONSTRAINT `FKn1klasr4eb2549wklwupoo0r8` FOREIGN KEY (`id_solicitado`) REFERENCES `usuarios` (`id_usuario`),
+  CONSTRAINT `FKqkmpn7bb8t6nmpao0d965rtoh` FOREIGN KEY (`id_solicitante`) REFERENCES `usuarios` (`id_usuario`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Volcado de datos para la tabla `productos`
+-- Dumping data for table `intercambios`
 --
 
-INSERT INTO `productos` (`id_producto`, `titulo`, `descripcion`, `plataforma_id`, `tipo_articulo_id`, `fecha_lanzamiento`, `valor_estimado`, `fecha_creacion`) VALUES
-(1, 'The Legend of Zelda: Breath of the Wild', 'Juego de acción-aventura épico para Nintendo Switch. Completo con caja y manual original.', 3, 7, NULL, 45.99, '2026-04-12 21:32:33'),
-(2, 'Elden Ring', 'RPG de acción desafiante de FromSoftware. Mundo abierto con jefes épicos.', 1, 7, NULL, 59.99, '2026-04-12 21:32:33'),
-(3, 'Fortnite: Battle Royale', 'Battle royale multiplayer popular. Juego F2P con skins exclusivas.', 4, 7, NULL, 0.00, '2026-04-12 21:32:33'),
-(4, 'Cyberpunk 2077', 'RPG futurista en mundo abierto de CD Projekt Red. Versión mejorada post-parches.', 2, 7, NULL, 49.99, '2026-04-12 21:32:33'),
-(5, 'Super Smash Bros. Ultimate', 'Juego de lucha con todos los personajes Nintendo. Incluye GameCube controller.', 3, 7, NULL, 59.99, '2026-04-12 21:32:33'),
-(6, 'Hollow Knight', 'hola', NULL, NULL, NULL, NULL, '2026-05-11 14:48:46'),
-(7, 'hola', 'sdasd', NULL, NULL, NULL, NULL, '2026-05-12 10:47:14'),
-(8, 'asadas', 'asd', NULL, NULL, NULL, NULL, '2026-05-12 10:48:18'),
-(9, 'asda', 'sada', NULL, NULL, NULL, NULL, '2026-05-12 10:50:03'),
-(10, 'Mario Oddysey', 'Videojuego Odyssey', 3, NULL, NULL, NULL, '2026-05-12 18:59:28'),
-(11, 'Mario Odissey', 'Videojuego Mario Odyssey', 3, NULL, NULL, NULL, '2026-05-12 19:01:00'),
-(12, 'Elden Ring - PS5', 'SI', 1, NULL, NULL, NULL, '2026-05-23 10:18:49'),
-(13, '121', '121', 1, NULL, NULL, NULL, '2026-05-23 11:04:06'),
-(14, 'sadasd', 'asdasdas', 1, NULL, NULL, NULL, '2026-05-23 12:26:43');
-
--- --------------------------------------------------------
+LOCK TABLES `intercambios` WRITE;
+/*!40000 ALTER TABLE `intercambios` DISABLE KEYS */;
+INSERT INTO `intercambios` VALUES (4,'COMPLETADA','2026-05-26 21:35:17.792538','me gusta el juego',56,24,16,1,1);
+/*!40000 ALTER TABLE `intercambios` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
--- Estructura de tabla para la tabla `publicaciones`
+-- Table structure for table `publicaciones`
 --
 
+DROP TABLE IF EXISTS `publicaciones`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `publicaciones` (
-  `id_publicacion` bigint(20) NOT NULL,
-  `id_usuario` bigint(20) NOT NULL,
-  `id_producto` bigint(20) NOT NULL,
-  `tipo_transaccion` enum('VENTA','INTERCAMBIO') NOT NULL,
+  `id_publicacion` bigint NOT NULL AUTO_INCREMENT,
+  `descripcion_estado` text,
+  `destacado` bit(1) DEFAULT NULL,
+  `estado_publicacion` enum('ACTIVA','DESACTIVADA') NOT NULL,
+  `fecha_creacion` datetime(6) NOT NULL,
   `precio` decimal(10,2) DEFAULT NULL,
-  `estado_articulo_id` bigint(20) DEFAULT NULL,
-  `descripcion_estado` text DEFAULT NULL,
-  `idioma_id` bigint(20) DEFAULT NULL,
-  `region_id` bigint(20) DEFAULT NULL,
-  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
-  `estado_publicacion` enum('ACTIVA','DESACTIVADA') DEFAULT 'ACTIVA',
-  `envio` tinyint(1) DEFAULT 0,
-  `destacado` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `tipo_transaccion` enum('VENTA','INTERCAMBIO') NOT NULL,
+  `estado_articulo_id` bigint DEFAULT NULL,
+  `idioma_id` bigint DEFAULT NULL,
+  `region_id` bigint DEFAULT NULL,
+  `id_usuario` bigint NOT NULL,
+  `descripcion` text,
+  `titulo` varchar(255) DEFAULT NULL,
+  `plataforma_id` bigint DEFAULT NULL,
+  `tipo_articulo_id` bigint DEFAULT NULL,
+  PRIMARY KEY (`id_publicacion`),
+  KEY `FKgop60o93bbpyx4k2tkjtq0hvb` (`estado_articulo_id`),
+  KEY `FK9sabyk5cdxee05q7ob3knbcmh` (`idioma_id`),
+  KEY `FKa5ihq0ls02v4e5ighbjuux81x` (`region_id`),
+  KEY `FKk477xvix6omjoytndeqcneh8m` (`id_usuario`),
+  KEY `FK9cox2mfbhk387940gyaitmjpt` (`plataforma_id`),
+  KEY `FKc683skvftrd9mdce90apd521d` (`tipo_articulo_id`),
+  CONSTRAINT `FK9cox2mfbhk387940gyaitmjpt` FOREIGN KEY (`plataforma_id`) REFERENCES `categorias` (`id_categoria`),
+  CONSTRAINT `FK9sabyk5cdxee05q7ob3knbcmh` FOREIGN KEY (`idioma_id`) REFERENCES `categorias` (`id_categoria`),
+  CONSTRAINT `FKa5ihq0ls02v4e5ighbjuux81x` FOREIGN KEY (`region_id`) REFERENCES `categorias` (`id_categoria`),
+  CONSTRAINT `FKc683skvftrd9mdce90apd521d` FOREIGN KEY (`tipo_articulo_id`) REFERENCES `categorias` (`id_categoria`),
+  CONSTRAINT `FKgop60o93bbpyx4k2tkjtq0hvb` FOREIGN KEY (`estado_articulo_id`) REFERENCES `categorias` (`id_categoria`),
+  CONSTRAINT `FKk477xvix6omjoytndeqcneh8m` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`)
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Volcado de datos para la tabla `publicaciones`
+-- Dumping data for table `publicaciones`
 --
 
-INSERT INTO `publicaciones` (`id_publicacion`, `id_usuario`, `id_producto`, `tipo_transaccion`, `precio`, `estado_articulo_id`, `descripcion_estado`, `idioma_id`, `region_id`, `fecha_creacion`, `estado_publicacion`, `envio`, `destacado`) VALUES
-(13, 11, 13, 'VENTA', 9.96, 12, '121', 16, 20, '2026-05-23 11:04:06', 'ACTIVA', 0, 0),
-(14, 12, 14, 'VENTA', 10.04, 12, 'Esta muy bien', 16, 20, '2026-05-23 12:26:43', 'ACTIVA', 0, 0);
-
--- --------------------------------------------------------
+LOCK TABLES `publicaciones` WRITE;
+/*!40000 ALTER TABLE `publicaciones` DISABLE KEYS */;
+INSERT INTO `publicaciones` VALUES (46,'Esto es un estado',_binary '\0','ACTIVA','2026-05-26 17:23:12.361986',35.00,'VENTA',11,16,20,17,'Videojuego Elden Ring para PC','Elden Ring',4,NULL),(47,'',_binary '\0','ACTIVA','2026-05-26 17:25:35.037088',0.00,'INTERCAMBIO',13,16,20,17,'Juego Mario Galaxy','Mario Galaxy',3,NULL),(48,'Solo tiene un pequeño desperfecto en un lateral',_binary '\0','ACTIVA','2026-05-26 17:32:53.851143',15.00,'VENTA',12,16,20,16,'Videojuego Hollow Knight','Hollow Knight',3,NULL),(49,'',_binary '\0','ACTIVA','2026-05-26 17:33:44.607057',40.00,'VENTA',11,17,20,16,'','Baldurs Gate',2,NULL),(51,'',_binary '\0','ACTIVA','2026-05-26 17:38:38.210555',55.00,'VENTA',11,16,20,15,'Videojuego Dune','Dune',4,NULL),(56,'esta perfecto',_binary '\0','ACTIVA','2026-05-26 21:35:01.080888',0.00,'INTERCAMBIO',11,16,20,24,'juego zelda','Zeld',3,NULL);
+/*!40000 ALTER TABLE `publicaciones` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
--- Estructura de tabla para la tabla `resenas`
+-- Table structure for table `resenas`
 --
 
+DROP TABLE IF EXISTS `resenas`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `resenas` (
-  `id_resena` bigint(20) NOT NULL,
-  `id_transaccion` bigint(20) DEFAULT NULL,
-  `id_autor` bigint(20) NOT NULL,
-  `id_receptor` bigint(20) NOT NULL,
-  `puntuacion` int(11) NOT NULL,
-  `comentario` text DEFAULT NULL,
-  `fecha_creacion` timestamp NOT NULL DEFAULT current_timestamp(),
-  `id_publicacion` bigint(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id_resena` bigint NOT NULL AUTO_INCREMENT,
+  `comentario` text,
+  `fecha_creacion` datetime(6) NOT NULL,
+  `puntuacion` int NOT NULL,
+  `id_autor` bigint NOT NULL,
+  `id_publicacion` bigint DEFAULT NULL,
+  `id_receptor` bigint NOT NULL,
+  `id_transaccion` bigint DEFAULT NULL,
+  PRIMARY KEY (`id_resena`),
+  KEY `FKfp10j6rycwoysc26ncpc8ed0o` (`id_autor`),
+  KEY `FKcxowb2st8ewf4r48bphm54ybn` (`id_publicacion`),
+  KEY `FKnefc1q4v8dvsananbc5bad5he` (`id_receptor`),
+  KEY `FKoov0ccpyg010wwa397q4w0m8` (`id_transaccion`),
+  CONSTRAINT `FKcxowb2st8ewf4r48bphm54ybn` FOREIGN KEY (`id_publicacion`) REFERENCES `publicaciones` (`id_publicacion`),
+  CONSTRAINT `FKfp10j6rycwoysc26ncpc8ed0o` FOREIGN KEY (`id_autor`) REFERENCES `usuarios` (`id_usuario`),
+  CONSTRAINT `FKnefc1q4v8dvsananbc5bad5he` FOREIGN KEY (`id_receptor`) REFERENCES `usuarios` (`id_usuario`),
+  CONSTRAINT `FKoov0ccpyg010wwa397q4w0m8` FOREIGN KEY (`id_transaccion`) REFERENCES `transacciones` (`id_transaccion`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Volcado de datos para la tabla `resenas`
+-- Dumping data for table `resenas`
 --
 
-INSERT INTO `resenas` (`id_resena`, `id_transaccion`, `id_autor`, `id_receptor`, `puntuacion`, `comentario`, `fecha_creacion`, `id_publicacion`) VALUES
-(6, NULL, 12, 11, 5, 'muy bueno', '2026-05-23 11:05:03', 13);
-
--- --------------------------------------------------------
+LOCK TABLES `resenas` WRITE;
+/*!40000 ALTER TABLE `resenas` DISABLE KEYS */;
+INSERT INTO `resenas` VALUES (8,'Excelente','2026-05-26 17:44:02.759946',5,15,48,16,NULL),(14,'Todo perfecto','2026-05-26 20:45:51.316193',5,16,51,15,NULL),(15,'Todo perfecto','2026-05-26 21:10:29.255114',5,21,49,16,NULL),(18,'muy bien','2026-05-26 21:36:23.542127',5,16,56,24,NULL);
+/*!40000 ALTER TABLE `resenas` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
--- Estructura de tabla para la tabla `transacciones`
+-- Table structure for table `transacciones`
 --
 
+DROP TABLE IF EXISTS `transacciones`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `transacciones` (
-  `id_transaccion` bigint(20) NOT NULL,
-  `id_publicacion` bigint(20) NOT NULL,
-  `id_comprador` bigint(20) NOT NULL,
-  `id_vendedor` bigint(20) NOT NULL,
-  `tipo` enum('VENTA','INTERCAMBIO') NOT NULL,
-  `precio_final` decimal(10,2) NOT NULL,
-  `fecha_transaccion` timestamp NOT NULL DEFAULT current_timestamp(),
-  `estado` enum('PENDIENTE','EN_TRANSITO','COMPLETADA','CANCELADA','DEVUELTA') DEFAULT 'PENDIENTE',
+  `id_transaccion` bigint NOT NULL AUTO_INCREMENT,
   `comision` decimal(10,2) DEFAULT NULL,
-  `retencion_pago` decimal(10,2) DEFAULT 0.00,
-  `fecha_entrega_prevista` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `estado` enum('PENDIENTE','EN_TRANSITO','COMPLETADA','CANCELADA','DEVUELTA') NOT NULL,
+  `fecha_transaccion` datetime(6) NOT NULL,
+  `precio_final` decimal(10,2) NOT NULL,
+  `tipo` enum('VENTA','INTERCAMBIO') NOT NULL,
+  `id_comprador` bigint NOT NULL,
+  `id_publicacion` bigint NOT NULL,
+  `id_vendedor` bigint NOT NULL,
+  PRIMARY KEY (`id_transaccion`),
+  KEY `FKto0r3uyue3fx80ephyj2dt3wb` (`id_comprador`),
+  KEY `FKo9ifcew00vawvjb1oy4ajrwbr` (`id_publicacion`),
+  KEY `FKjet4iksyw192x4l5qhavr9xt6` (`id_vendedor`),
+  CONSTRAINT `FKjet4iksyw192x4l5qhavr9xt6` FOREIGN KEY (`id_vendedor`) REFERENCES `usuarios` (`id_usuario`),
+  CONSTRAINT `FKo9ifcew00vawvjb1oy4ajrwbr` FOREIGN KEY (`id_publicacion`) REFERENCES `publicaciones` (`id_publicacion`),
+  CONSTRAINT `FKto0r3uyue3fx80ephyj2dt3wb` FOREIGN KEY (`id_comprador`) REFERENCES `usuarios` (`id_usuario`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Volcado de datos para la tabla `transacciones`
+-- Dumping data for table `transacciones`
 --
 
-INSERT INTO `transacciones` (`id_transaccion`, `id_publicacion`, `id_comprador`, `id_vendedor`, `tipo`, `precio_final`, `fecha_transaccion`, `estado`, `comision`, `retencion_pago`, `fecha_entrega_prevista`) VALUES
-(13, 14, 11, 12, 'VENTA', 10.04, '2026-05-23 13:21:52', 'PENDIENTE', 1.00, 0.00, NULL);
-
--- --------------------------------------------------------
+LOCK TABLES `transacciones` WRITE;
+/*!40000 ALTER TABLE `transacciones` DISABLE KEYS */;
+/*!40000 ALTER TABLE `transacciones` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
--- Estructura de tabla para la tabla `usuarios`
+-- Table structure for table `usuarios`
 --
 
+DROP TABLE IF EXISTS `usuarios`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `usuarios` (
-  `id_usuario` bigint(20) NOT NULL,
-  `email` varchar(255) NOT NULL,
+  `id_usuario` bigint NOT NULL AUTO_INCREMENT,
+  `activo` bit(1) NOT NULL DEFAULT 1,
   `contrasena` varchar(255) NOT NULL,
-  `nombre_usuario` varchar(100) NOT NULL,
-  `rol` enum('INVITADO','REGISTRADO','ADMIN') NOT NULL DEFAULT 'REGISTRADO',
-  `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp(),
+  `email` varchar(255) NOT NULL,
+  `fecha_registro` datetime(6) NOT NULL,
+  `nombre_usuario` varchar(255) NOT NULL,
+  `puntos_acumulados` bigint NOT NULL,
+  `reputacion_media` decimal(3,2) NOT NULL,
+  `rol` enum('INVITADO','REGISTRADO','ADMIN') NOT NULL,
   `ubicacion` varchar(255) DEFAULT NULL,
-  `puntos_acumulados` bigint(20) DEFAULT 0,
-  `verificado_identidad` tinyint(1) DEFAULT 0,
-  `reputacion_media` decimal(3,2) DEFAULT 0.00
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `verificado_identidad` bit(1) NOT NULL,
+  PRIMARY KEY (`id_usuario`),
+  UNIQUE KEY `UK_kfsp0s1tflm1cwlj8idhqsad0` (`email`),
+  UNIQUE KEY `UK_of5vabgukahdwmgxk4kjrbu98` (`nombre_usuario`)
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Volcado de datos para la tabla `usuarios`
+-- Dumping data for table `usuarios`
 --
 
-INSERT INTO `usuarios` (`id_usuario`, `email`, `contrasena`, `nombre_usuario`, `rol`, `fecha_registro`, `ubicacion`, `puntos_acumulados`, `verificado_identidad`, `reputacion_media`) VALUES
-(1, 'admin@looteria.com', 'admin123', 'admin', 'ADMIN', '2026-02-24 12:17:11', 'España', 1000, 1, 5.00),
-(2, 'user1@example.com', 'password123', 'jugador1', 'REGISTRADO', '2026-02-24 12:17:11', 'Madrid', 100, 1, 4.50),
-(3, 'user2@example.com', 'password456', 'coleccionista', 'REGISTRADO', '2026-02-24 12:17:11', 'Barcelona', 50, 0, 3.75),
-(10, 'raul@gmail.com', '12345', 'rauulvt', 'REGISTRADO', '2026-03-16 20:44:41', NULL, 0, 0, 0.00),
-(11, 'josemi@gmail.com', '123456', 'Minino', 'REGISTRADO', '2026-03-16 22:09:06', 'Sevilla', 75, 0, 5.00),
-(12, 'pepitoeldelamotocicleta@gmail.com', '123456', 'Israel', 'REGISTRADO', '2026-03-17 15:05:29', 'Alcosa', 100, 1, 0.00);
-
--- --------------------------------------------------------
+LOCK TABLES `usuarios` WRITE;
+/*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
+INSERT INTO `usuarios` VALUES (1,'admin123','admin@looteria.com','2026-02-24 12:17:11.000000','admin',1000,5.00,'ADMIN','España',_binary ''),(15,'2.Pepito.3','raul@gmail.com','2026-05-26 17:18:08.892636','rauulvt',50,5.00,'REGISTRADO','Sevilla',_binary ''),(16,'2.Josemi.3','josemi@gmail.com','2026-05-26 17:19:09.444512','jmzerpa06',150,5.00,'REGISTRADO','Bollullos',_binary ''),(17,'2.Israel.3','israel@gmail.com','2026-05-26 17:19:43.455302','narvaaez',125,0.00,'REGISTRADO','',_binary '\0'),(21,'2.Antonio.3','antonio@gmail.com','2026-05-26 21:06:55.983154','Antonio',75,4.00,'REGISTRADO','Huelva',_binary '\0'),(24,'2.Pepe.3','pepe@gmail.com','2026-05-26 21:30:21.997708','Pepe',175,5.00,'REGISTRADO','Sevilla',_binary '');
+/*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
--- Estructura de tabla para la tabla `verificaciones`
+-- Table structure for table `verificaciones`
 --
 
+DROP TABLE IF EXISTS `verificaciones`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `verificaciones` (
-  `id_verificacion` bigint(20) NOT NULL,
-  `id_transaccion` bigint(20) NOT NULL,
-  `id_publicacion` bigint(20) NOT NULL,
-  `id_admin_verificador` bigint(20) DEFAULT NULL,
-  `estado` enum('PENDIENTE','APROBADA','RECHAZADA','CANCELADA') DEFAULT 'PENDIENTE',
-  `fecha_solicitud` timestamp NOT NULL DEFAULT current_timestamp(),
-  `fecha_respuesta` datetime DEFAULT NULL,
-  `comentario_admin` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
+  `id_verificacion` bigint NOT NULL AUTO_INCREMENT,
+  `comentario_admin` text,
+  `estado` enum('PENDIENTE','APROBADA','RECHAZADA','CANCELADA') NOT NULL,
+  `fecha_respuesta` datetime(6) DEFAULT NULL,
+  `fecha_solicitud` datetime(6) NOT NULL,
+  `id_admin_verificador` bigint DEFAULT NULL,
+  `id_publicacion` bigint NOT NULL,
+  `id_transaccion` bigint NOT NULL,
+  PRIMARY KEY (`id_verificacion`),
+  KEY `FKt02845aviiw3q2t3av43fb1d2` (`id_admin_verificador`),
+  KEY `FKq05euy8gh20kh5e2bm1s3ollo` (`id_publicacion`),
+  KEY `FK16q55ep0h7jihgoauasg9apdj` (`id_transaccion`),
+  CONSTRAINT `FK16q55ep0h7jihgoauasg9apdj` FOREIGN KEY (`id_transaccion`) REFERENCES `transacciones` (`id_transaccion`),
+  CONSTRAINT `FKq05euy8gh20kh5e2bm1s3ollo` FOREIGN KEY (`id_publicacion`) REFERENCES `publicaciones` (`id_publicacion`),
+  CONSTRAINT `FKt02845aviiw3q2t3av43fb1d2` FOREIGN KEY (`id_admin_verificador`) REFERENCES `usuarios` (`id_usuario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Estructura de tabla para la tabla `verification_codes`
+-- Dumping data for table `verificaciones`
 --
 
+LOCK TABLES `verificaciones` WRITE;
+/*!40000 ALTER TABLE `verificaciones` DISABLE KEYS */;
+/*!40000 ALTER TABLE `verificaciones` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `verification_codes`
+--
+
+DROP TABLE IF EXISTS `verification_codes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `verification_codes` (
-  `id` bigint(20) NOT NULL,
-  `codigo` varchar(10) NOT NULL,
-  `fecha_creacion` datetime NOT NULL,
-  `fecha_expiracion` datetime NOT NULL,
-  `usado` tinyint(1) NOT NULL DEFAULT 0,
-  `id_usuario` bigint(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `codigo` varchar(255) NOT NULL,
+  `fecha_creacion` datetime(6) NOT NULL,
+  `fecha_expiracion` datetime(6) NOT NULL,
+  `usado` bit(1) NOT NULL,
+  `id_usuario` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKhpsd7ln6lhrfg1tbb0g8bs48u` (`id_usuario`),
+  CONSTRAINT `FKhpsd7ln6lhrfg1tbb0g8bs48u` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Volcado de datos para la tabla `verification_codes`
+-- Dumping data for table `verification_codes`
 --
 
-INSERT INTO `verification_codes` (`id`, `codigo`, `fecha_creacion`, `fecha_expiracion`, `usado`, `id_usuario`) VALUES
-(1, '639437', '2026-05-23 16:41:30', '2026-05-23 17:11:30', 1, 12);
+LOCK TABLES `verification_codes` WRITE;
+/*!40000 ALTER TABLE `verification_codes` DISABLE KEYS */;
+/*!40000 ALTER TABLE `verification_codes` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
--- Índices para tablas volcadas
+-- Dumping routines for database 'railway'
 --
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
---
--- Indices de la tabla `canjes_puntos`
---
-ALTER TABLE `canjes_puntos`
-  ADD PRIMARY KEY (`id_canje`),
-  ADD UNIQUE KEY `UK_59puy198mhwaqn699gl32q49w` (`codigo`),
-  ADD KEY `FKbx1arkfyomhgvw9b37so0sflb` (`id_usuario`);
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
---
--- Indices de la tabla `carrito`
---
-ALTER TABLE `carrito`
-  ADD PRIMARY KEY (`id_carrito`),
-  ADD UNIQUE KEY `unique_cart_item` (`id_usuario`,`id_publicacion`),
-  ADD KEY `id_publicacion` (`id_publicacion`);
-
---
--- Indices de la tabla `categorias`
---
-ALTER TABLE `categorias`
-  ADD PRIMARY KEY (`id_categoria`),
-  ADD KEY `idx_tipo` (`tipo`),
-  ADD KEY `idx_nombre` (`nombre`);
-
---
--- Indices de la tabla `envios`
---
-ALTER TABLE `envios`
-  ADD PRIMARY KEY (`id_envio`),
-  ADD UNIQUE KEY `numero_seguimiento` (`numero_seguimiento`),
-  ADD KEY `idx_transaccion` (`id_transaccion`),
-  ADD KEY `idx_numero_seguimiento` (`numero_seguimiento`);
-
---
--- Indices de la tabla `imagenes`
---
-ALTER TABLE `imagenes`
-  ADD PRIMARY KEY (`id_imagen`),
-  ADD KEY `idx_publicacion` (`id_publicacion`);
-
---
--- Indices de la tabla `intercambios`
---
-ALTER TABLE `intercambios`
-  ADD PRIMARY KEY (`id_intercambio`),
-  ADD KEY `id_publicacion` (`id_publicacion`),
-  ADD KEY `id_solicitante` (`id_solicitante`),
-  ADD KEY `id_solicitado` (`id_solicitado`);
-
---
--- Indices de la tabla `productos`
---
-ALTER TABLE `productos`
-  ADD PRIMARY KEY (`id_producto`),
-  ADD KEY `idx_titulo` (`titulo`),
-  ADD KEY `idx_plataforma` (`plataforma_id`),
-  ADD KEY `idx_tipo_articulo` (`tipo_articulo_id`);
-
---
--- Indices de la tabla `publicaciones`
---
-ALTER TABLE `publicaciones`
-  ADD PRIMARY KEY (`id_publicacion`),
-  ADD KEY `estado_articulo_id` (`estado_articulo_id`),
-  ADD KEY `idioma_id` (`idioma_id`),
-  ADD KEY `region_id` (`region_id`),
-  ADD KEY `idx_usuario` (`id_usuario`),
-  ADD KEY `idx_producto` (`id_producto`),
-  ADD KEY `idx_estado_publicacion` (`estado_publicacion`),
-  ADD KEY `idx_tipo_transaccion` (`tipo_transaccion`);
-
---
--- Indices de la tabla `resenas`
---
-ALTER TABLE `resenas`
-  ADD PRIMARY KEY (`id_resena`),
-  ADD KEY `id_autor` (`id_autor`),
-  ADD KEY `idx_transaccion` (`id_transaccion`),
-  ADD KEY `idx_receptor` (`id_receptor`),
-  ADD KEY `resenas_ibfk_4` (`id_publicacion`);
-
---
--- Indices de la tabla `transacciones`
---
-ALTER TABLE `transacciones`
-  ADD PRIMARY KEY (`id_transaccion`),
-  ADD KEY `idx_publicacion` (`id_publicacion`),
-  ADD KEY `idx_comprador` (`id_comprador`),
-  ADD KEY `idx_vendedor` (`id_vendedor`),
-  ADD KEY `idx_estado` (`estado`);
-
---
--- Indices de la tabla `usuarios`
---
-ALTER TABLE `usuarios`
-  ADD PRIMARY KEY (`id_usuario`),
-  ADD UNIQUE KEY `email` (`email`),
-  ADD UNIQUE KEY `nombre_usuario` (`nombre_usuario`),
-  ADD KEY `idx_email` (`email`),
-  ADD KEY `idx_nombre_usuario` (`nombre_usuario`),
-  ADD KEY `idx_rol` (`rol`);
-
---
--- Indices de la tabla `verificaciones`
---
-ALTER TABLE `verificaciones`
-  ADD PRIMARY KEY (`id_verificacion`),
-  ADD KEY `id_publicacion` (`id_publicacion`),
-  ADD KEY `id_admin_verificador` (`id_admin_verificador`),
-  ADD KEY `idx_transaccion` (`id_transaccion`),
-  ADD KEY `idx_estado` (`estado`);
-
---
--- Indices de la tabla `verification_codes`
---
-ALTER TABLE `verification_codes`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_usuario` (`id_usuario`);
-
---
--- AUTO_INCREMENT de las tablas volcadas
---
-
---
--- AUTO_INCREMENT de la tabla `canjes_puntos`
---
-ALTER TABLE `canjes_puntos`
-  MODIFY `id_canje` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `carrito`
---
-ALTER TABLE `carrito`
-  MODIFY `id_carrito` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `categorias`
---
-ALTER TABLE `categorias`
-  MODIFY `id_categoria` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;
-
---
--- AUTO_INCREMENT de la tabla `envios`
---
-ALTER TABLE `envios`
-  MODIFY `id_envio` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `imagenes`
---
-ALTER TABLE `imagenes`
-  MODIFY `id_imagen` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
-
---
--- AUTO_INCREMENT de la tabla `intercambios`
---
-ALTER TABLE `intercambios`
-  MODIFY `id_intercambio` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `productos`
---
-ALTER TABLE `productos`
-  MODIFY `id_producto` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
-
---
--- AUTO_INCREMENT de la tabla `publicaciones`
---
-ALTER TABLE `publicaciones`
-  MODIFY `id_publicacion` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
-
---
--- AUTO_INCREMENT de la tabla `resenas`
---
-ALTER TABLE `resenas`
-  MODIFY `id_resena` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT de la tabla `transacciones`
---
-ALTER TABLE `transacciones`
-  MODIFY `id_transaccion` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
-
---
--- AUTO_INCREMENT de la tabla `usuarios`
---
-ALTER TABLE `usuarios`
-  MODIFY `id_usuario` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
-
---
--- AUTO_INCREMENT de la tabla `verificaciones`
---
-ALTER TABLE `verificaciones`
-  MODIFY `id_verificacion` bigint(20) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `verification_codes`
---
-ALTER TABLE `verification_codes`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- Restricciones para tablas volcadas
---
-
---
--- Filtros para la tabla `canjes_puntos`
---
-ALTER TABLE `canjes_puntos`
-  ADD CONSTRAINT `FKbx1arkfyomhgvw9b37so0sflb` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`);
-
---
--- Filtros para la tabla `carrito`
---
-ALTER TABLE `carrito`
-  ADD CONSTRAINT `carrito_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE CASCADE,
-  ADD CONSTRAINT `carrito_ibfk_2` FOREIGN KEY (`id_publicacion`) REFERENCES `publicaciones` (`id_publicacion`) ON DELETE CASCADE;
-
---
--- Filtros para la tabla `envios`
---
-ALTER TABLE `envios`
-  ADD CONSTRAINT `envios_ibfk_1` FOREIGN KEY (`id_transaccion`) REFERENCES `transacciones` (`id_transaccion`) ON DELETE CASCADE;
-
---
--- Filtros para la tabla `imagenes`
---
-ALTER TABLE `imagenes`
-  ADD CONSTRAINT `imagenes_ibfk_1` FOREIGN KEY (`id_publicacion`) REFERENCES `publicaciones` (`id_publicacion`) ON DELETE CASCADE;
-
---
--- Filtros para la tabla `intercambios`
---
-ALTER TABLE `intercambios`
-  ADD CONSTRAINT `intercambios_ibfk_1` FOREIGN KEY (`id_publicacion`) REFERENCES `publicaciones` (`id_publicacion`) ON DELETE CASCADE,
-  ADD CONSTRAINT `intercambios_ibfk_2` FOREIGN KEY (`id_solicitante`) REFERENCES `usuarios` (`id_usuario`),
-  ADD CONSTRAINT `intercambios_ibfk_3` FOREIGN KEY (`id_solicitado`) REFERENCES `usuarios` (`id_usuario`);
-
---
--- Filtros para la tabla `productos`
---
-ALTER TABLE `productos`
-  ADD CONSTRAINT `productos_ibfk_1` FOREIGN KEY (`plataforma_id`) REFERENCES `categorias` (`id_categoria`) ON DELETE SET NULL,
-  ADD CONSTRAINT `productos_ibfk_2` FOREIGN KEY (`tipo_articulo_id`) REFERENCES `categorias` (`id_categoria`) ON DELETE SET NULL;
-
---
--- Filtros para la tabla `publicaciones`
---
-ALTER TABLE `publicaciones`
-  ADD CONSTRAINT `publicaciones_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE CASCADE,
-  ADD CONSTRAINT `publicaciones_ibfk_2` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`) ON DELETE CASCADE,
-  ADD CONSTRAINT `publicaciones_ibfk_3` FOREIGN KEY (`estado_articulo_id`) REFERENCES `categorias` (`id_categoria`) ON DELETE SET NULL,
-  ADD CONSTRAINT `publicaciones_ibfk_4` FOREIGN KEY (`idioma_id`) REFERENCES `categorias` (`id_categoria`) ON DELETE SET NULL,
-  ADD CONSTRAINT `publicaciones_ibfk_5` FOREIGN KEY (`region_id`) REFERENCES `categorias` (`id_categoria`) ON DELETE SET NULL;
-
---
--- Filtros para la tabla `resenas`
---
-ALTER TABLE `resenas`
-  ADD CONSTRAINT `resenas_ibfk_1` FOREIGN KEY (`id_transaccion`) REFERENCES `transacciones` (`id_transaccion`) ON DELETE CASCADE,
-  ADD CONSTRAINT `resenas_ibfk_2` FOREIGN KEY (`id_autor`) REFERENCES `usuarios` (`id_usuario`),
-  ADD CONSTRAINT `resenas_ibfk_3` FOREIGN KEY (`id_receptor`) REFERENCES `usuarios` (`id_usuario`),
-  ADD CONSTRAINT `resenas_ibfk_4` FOREIGN KEY (`id_publicacion`) REFERENCES `publicaciones` (`id_publicacion`) ON DELETE CASCADE;
-
---
--- Filtros para la tabla `transacciones`
---
-ALTER TABLE `transacciones`
-  ADD CONSTRAINT `transacciones_ibfk_1` FOREIGN KEY (`id_publicacion`) REFERENCES `publicaciones` (`id_publicacion`) ON DELETE CASCADE,
-  ADD CONSTRAINT `transacciones_ibfk_2` FOREIGN KEY (`id_comprador`) REFERENCES `usuarios` (`id_usuario`),
-  ADD CONSTRAINT `transacciones_ibfk_3` FOREIGN KEY (`id_vendedor`) REFERENCES `usuarios` (`id_usuario`);
-
---
--- Filtros para la tabla `verificaciones`
---
-ALTER TABLE `verificaciones`
-  ADD CONSTRAINT `verificaciones_ibfk_1` FOREIGN KEY (`id_transaccion`) REFERENCES `transacciones` (`id_transaccion`) ON DELETE CASCADE,
-  ADD CONSTRAINT `verificaciones_ibfk_2` FOREIGN KEY (`id_publicacion`) REFERENCES `publicaciones` (`id_publicacion`) ON DELETE CASCADE,
-  ADD CONSTRAINT `verificaciones_ibfk_3` FOREIGN KEY (`id_admin_verificador`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL;
-
---
--- Filtros para la tabla `verification_codes`
---
-ALTER TABLE `verification_codes`
-  ADD CONSTRAINT `verification_codes_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE CASCADE;
-COMMIT;
+-- Dump completed on 2026-05-30 19:10:40

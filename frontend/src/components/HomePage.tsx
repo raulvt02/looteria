@@ -72,10 +72,10 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+      {/* Hero */}
       <Hero onNavigate={onNavigate} />
 
-      {/* Featured Games Section */}
+      {/* Publicaciones */}
       <section className="py-16 bg-white">
         {loading ? (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-12">
@@ -93,7 +93,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
               </p>
             </div>
 
-            {/* Games Grid */}
+            {/* Juegos */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredGames.map((game) => (
                 <GameCard
@@ -107,7 +107,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
         )}
       </section>
 
-      {/* Popular Games Carousel */}
+      {/* Carrusel */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
@@ -135,7 +135,7 @@ export function HomePage({ onNavigate }: HomePageProps) {
             </div>
           </div>
 
-          {/* Carousel */}
+          {/* Carrusel */}
           <div
             ref={carouselRef}
             className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
@@ -150,7 +150,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
-      {/* How It Works */}
       <HowItWorks />
 
       {/* Footer */}
